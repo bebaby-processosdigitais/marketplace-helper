@@ -19,10 +19,12 @@ export async function showAuthPage(req, res) {
   });
 }
 
-// Salva App ID, Secret e Redirect URI do usuario
+// Salva App ID, Secret e Redirect URI do usuario.
+// O Secret pode vir em branco se ja houver um salvo (mantem o atual).
 export async function saveMlCredentials(req, res) {
   const { appId, appSecret, redirectUri } = req.body;
-  if (!appId || !appSecret || !redirectUri) {
+  const status = await getAuthStatus(req.user.id);
+  if (!appId || !redirectUri || (!appSecret && !status.hasSecret)) {
     return res.redirect("/auth?error=" + encodeURIComponent("Preencha App ID, Secret e Redirect URI."));
   }
   await saveCredentials(req.user.id, { appId, appSecret, redirectUri });

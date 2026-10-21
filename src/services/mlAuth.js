@@ -9,18 +9,17 @@ export async function getMlAccount(userId) {
   return acc;
 }
 
-// Salva as credenciais do app (App ID, Secret, Redirect URI) do usuario
+// Salva as credenciais do app (App ID, Secret, Redirect URI) do usuario.
+// O Secret so e sobrescrito se um novo valor for informado (em branco = mantem).
 export async function saveCredentials(userId, { appId, appSecret, redirectUri }) {
+  await getMlAccount(userId); // garante que a linha existe
   const data = {
     appId: (appId || "").trim(),
-    appSecret: (appSecret || "").trim(),
     redirectUri: (redirectUri || "").trim(),
   };
-  return prisma.mlAccount.upsert({
-    where: { userId },
-    update: data,
-    create: { userId, ...data },
-  });
+  const secret = (appSecret || "").trim();
+  if (secret) data.appSecret = secret;
+  return prisma.mlAccount.update({ where: { userId }, data });
 }
 
 // URL para autorizar o app (null se faltam credenciais)
@@ -122,11 +121,12 @@ export async function getValidToken(userId) {
 export async function getAuthStatus(userId) {
   const acc = await prisma.mlAccount.findUnique({ where: { userId } });
   const hasCredentials = !!(acc && acc.appId && acc.appSecret && acc.redirectUri);
+  // IMPORTANTE: nunca devolver o appSecret para a camada de view.
   const base = {
     hasCredentials,
     appId: acc?.appId || "",
-    appSecret: acc?.appSecret || "",
     redirectUri: acc?.redirectUri || "",
+    hasSecret: !!(acc && acc.appSecret),
   };
   if (!acc || !acc.accessToken) {
     return { ...base, authenticated: false };

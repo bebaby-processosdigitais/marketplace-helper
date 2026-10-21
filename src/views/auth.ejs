@@ -37,11 +37,19 @@
       <form action="/auth/credentials" method="post" class="row g-3">
         <div class="col-12 col-md-6">
           <label class="form-label">App ID (Client ID)</label>
-          <input type="text" name="appId" class="form-control" value="<%= status.appId %>" required />
+          <input type="password" name="appId" class="form-control cred-field" value="<%= status.appId %>" autocomplete="off" required />
         </div>
         <div class="col-12 col-md-6">
           <label class="form-label">Secret Key (Client Secret)</label>
-          <input type="text" name="appSecret" class="form-control" value="<%= status.appSecret %>" required />
+          <input
+            type="password" name="appSecret" class="form-control cred-field"
+            value="" autocomplete="off"
+            placeholder="<%= status.hasSecret ? '•••••••• (salvo — deixe em branco para manter)' : 'Cole o Secret Key' %>"
+            <%= status.hasSecret ? '' : 'required' %>
+          />
+          <% if (status.hasSecret) { %>
+            <small class="text-success"><i class="bi bi-lock-fill"></i> Secret já salvo com segurança. Preencha só se for trocar.</small>
+          <% } %>
         </div>
         <div class="col-12">
           <label class="form-label">Redirect URI</label>
@@ -49,10 +57,14 @@
                  placeholder="https://seu-dominio/redirect" required />
           <small class="text-muted">Deve ser idêntica à cadastrada no painel do ML.</small>
         </div>
-        <div class="col-12">
+        <div class="col-12 d-flex align-items-center gap-3">
           <button type="submit" class="btn btn-primary">
             <i class="bi bi-save"></i> Salvar credenciais
           </button>
+          <div class="form-check mb-0">
+            <input class="form-check-input" type="checkbox" id="showCreds" />
+            <label class="form-check-label text-muted" for="showCreds">Mostrar credenciais</label>
+          </div>
         </div>
       </form>
     </div>
@@ -88,5 +100,18 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Alterna entre ocultar/mostrar os campos de credenciais
+  (function () {
+    var chk = document.getElementById("showCreds");
+    if (!chk) return;
+    chk.addEventListener("change", function () {
+      document.querySelectorAll(".cred-field").forEach(function (el) {
+        el.type = chk.checked ? "text" : "password";
+      });
+    });
+  })();
+</script>
 
 <%- include('partials/footer') %>
