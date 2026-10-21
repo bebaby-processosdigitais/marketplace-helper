@@ -7,39 +7,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Tokens OAuth do Mercado Livre (uma linha unica com id=1)
-model Token {
-  id           Int      @id @default(1)
-  accessToken  String
-  refreshToken String
-  userId       String?
-  expiresIn    Int      @default(21600)
-  savedAt      DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+// Usuario da aplicacao (cada loja tem a sua conta)
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  storeName    String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  mlAccount    MlAccount?
+  settings     Settings?
+  businessRule BusinessRule?
+  items        Item[]
 }
 
-// Configuracoes gerais da aplicacao (uma linha unica com id=1)
+// Credenciais do app do Mercado Livre + tokens OAuth, por usuario
+model MlAccount {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @unique
+  appId        String?
+  appSecret    String?
+  redirectUri  String?
+  accessToken  String?
+  refreshToken String?
+  mlUserId     String?
+  expiresIn    Int       @default(21600)
+  savedAt      DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Configuracoes por usuario
 model Settings {
-  id        Int      @id @default(1)
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
   zipCode   String   @default("01001000")
   updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// Regras de negocio: impostos e custos usados nos calculos (linha unica id=1).
-// Todos os valores em porcentagem (%).
+// Regras de negocio por usuario (valores em %)
 model BusinessRule {
-  id               Int      @id @default(1)
+  id               Int      @id @default(autoincrement())
+  userId           Int      @unique
   icms             Float    @default(0)
   ipi              Float    @default(0)
   difal            Float    @default(0)
   custoOperacional Float    @default(0)
   updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// Anuncios do Mercado Livre
+// Anuncios do Mercado Livre (por usuario)
 model Item {
   id            Int      @id @default(autoincrement())
-  mlb           String   @unique
+  userId        Int
+  mlb           String
   proprio       Boolean  @default(true)
   variacaoIds   String?
   sku           String?
@@ -68,8 +94,11 @@ model Item {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   shippingHistory ShippingHistory[]
 
+  @@unique([userId, mlb])
+  @@index([userId])
   @@index([titulo])
   @@index([frete])
 }

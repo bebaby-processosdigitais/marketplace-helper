@@ -1,4 +1,5 @@
 import express from "express";
+import cookieSession from "cookie-session";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "./config/env.js";
@@ -17,6 +18,17 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
+
+// Sessao por cookie (login)
+app.use(
+  cookieSession({
+    name: "mh_session",
+    keys: [config.sessionSecret],
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
+    httpOnly: true,
+    sameSite: "lax",
+  })
+);
 
 // Rotas
 app.use("/", routes);

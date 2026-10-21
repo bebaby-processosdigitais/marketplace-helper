@@ -2,7 +2,7 @@ import { buildItemsWorkbook } from "../services/exportService.js";
 
 export async function exportExcel(req, res) {
   const { search } = req.query;
-  const wb = await buildItemsWorkbook(search || "");
+  const wb = await buildItemsWorkbook(req.user.id, search || "");
 
   const date = new Date().toISOString().slice(0, 10);
   const filename = `anuncios_${date}.xlsx`;

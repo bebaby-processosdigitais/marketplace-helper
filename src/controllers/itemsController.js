@@ -3,10 +3,11 @@ import { getSettings } from "../services/syncService.js";
 import { getAuthStatus } from "../services/mlAuth.js";
 
 export async function showItems(req, res) {
+  const userId = req.user.id;
   const { page, search, sort, dir } = req.query;
-  const data = await listItems({ page, search, sort, dir });
-  const settings = await getSettings();
-  const status = await getAuthStatus();
+  const data = await listItems({ userId, page, search, sort, dir });
+  const settings = await getSettings(userId);
+  const status = await getAuthStatus(userId);
 
   res.render("items", {
     title: "Anuncios",

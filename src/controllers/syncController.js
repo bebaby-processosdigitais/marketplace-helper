@@ -1,19 +1,19 @@
 import { runSync, getSyncState, updateZipCode } from "../services/syncService.js";
 import { getAuthStatus } from "../services/mlAuth.js";
 
-// Dispara o sync completo (todos os anuncios) em background
 export async function startSync(req, res) {
-  const status = await getAuthStatus();
+  const userId = req.user.id;
+  const status = await getAuthStatus(userId);
   if (!status.authenticated) {
     return res.status(401).json({ error: "Autorize o app primeiro." });
   }
-  const state = await runSync();
+  const state = await runSync(userId);
   res.json({ ok: true, state });
 }
 
-// Dispara o sync apenas dos anuncios selecionados
 export async function startSyncSelection(req, res) {
-  const status = await getAuthStatus();
+  const userId = req.user.id;
+  const status = await getAuthStatus(userId);
   if (!status.authenticated) {
     return res.status(401).json({ error: "Autorize o app primeiro." });
   }
@@ -21,18 +21,15 @@ export async function startSyncSelection(req, res) {
   if (mlbs.length === 0) {
     return res.status(400).json({ error: "Nenhum anuncio selecionado." });
   }
-  const state = await runSync(mlbs);
+  const state = await runSync(userId, mlbs);
   res.json({ ok: true, state });
 }
 
-// Consulta o progresso do sync
 export function syncStatus(req, res) {
-  res.json(getSyncState());
+  res.json(getSyncState(req.user.id));
 }
 
-// Atualiza o CEP usado no calculo de frete
 export async function saveZipCode(req, res) {
-  const { zipCode } = req.body;
-  await updateZipCode(zipCode);
+  await updateZipCode(req.user.id, req.body.zipCode);
   res.redirect(req.get("referer") || "/");
 }

@@ -2,10 +2,10 @@ import ExcelJS from "exceljs";
 import prisma from "../config/prisma.js";
 import { buildItemWhere } from "./itemService.js";
 
-// Gera um workbook Excel com os itens (respeita o filtro de busca)
-export async function buildItemsWorkbook(search) {
+// Gera um workbook Excel com os itens do usuario (respeita o filtro de busca)
+export async function buildItemsWorkbook(userId, search) {
   const items = await prisma.item.findMany({
-    where: buildItemWhere(search),
+    where: buildItemWhere(userId, search),
     orderBy: { updatedAt: "desc" },
   });
 

@@ -1,6 +1,6 @@
 import prisma from "../config/prisma.js";
 import {
-  getUserId,
+  getMlUserId,
   getAllItemIds,
   getItemsDetails,
   getVisits,
@@ -12,36 +12,37 @@ import {
   formatDate,
 } from "./mlApi.js";
 
-// Estado de progresso em memoria (para a UI consultar durante o sync)
-let syncState = {
-  running: false,
-  phase: "idle",
-  totalIds: 0,
-  processed: 0,
-  novos: 0,
-  atualizados: 0,
-  fretesMudaram: 0,
-  startedAt: null,
-  finishedAt: null,
-  error: null,
-};
+// Estado de progresso por usuario (userId -> state)
+const syncStates = new Map();
 
-export function getSyncState() {
-  return syncState;
+function idleState() {
+  return {
+    running: false,
+    phase: "idle",
+    escopo: null,
+    totalIds: 0,
+    processed: 0,
+    novos: 0,
+    atualizados: 0,
+    fretesMudaram: 0,
+    startedAt: null,
+    finishedAt: null,
+    error: null,
+  };
 }
 
-// Extrai os campos relevantes do JSON do item do ML
+export function getSyncState(userId) {
+  return syncStates.get(userId) || idleState();
+}
+
+// ================= parsing =================
 function parseAttributes(data) {
   const attrs = data.attributes || [];
   const findAttr = (id) => attrs.find((a) => a.id === id)?.value_name;
 
-  // SKU
   let sku = data.seller_custom_field || findAttr("SELLER_SKU") || null;
-
-  // Marca
   const marca = findAttr("BRAND") || null;
 
-  // Variacoes
   const variacaoIds = new Set();
   const variacaoSkus = new Set();
   for (const v of data.variations || []) {
@@ -51,7 +52,6 @@ function parseAttributes(data) {
       if (a.id === "SELLER_SKU" && a.value_name) variacaoSkus.add(a.value_name);
     }
   }
-
   return {
     sku,
     marca,
@@ -60,7 +60,6 @@ function parseAttributes(data) {
   };
 }
 
-// Retorna true se a promocao esta dentro da janela de validade (start/end)
 function promoAtiva(p) {
   const now = Date.now();
   const s = p.conditions?.start_time ? Date.parse(p.conditions.start_time) : -Infinity;
@@ -68,17 +67,13 @@ function promoAtiva(p) {
   return now >= s && now <= e;
 }
 
-// Calcula PRECO DE / PRECO POR usando o endpoint /prices (promocoes).
-// Faz fallback para original_price e price do item se /prices nao trouxer nada.
 function parsePrices(data, pricesList) {
   const itemPrice = Number(data.price) || 0;
   const list = Array.isArray(pricesList) ? pricesList : [];
 
-  // Preco normal (standard) do item
   const standard = list.find((p) => p.type === "standard");
   const normal = standard ? Number(standard.amount) : itemPrice;
 
-  // Promocoes ativas (qualquer tipo != standard, com valor valido e dentro da janela)
   const promos = list
     .filter((p) => p.type !== "standard" && Number(p.amount) > 0 && promoAtiva(p))
     .sort((a, b) => Number(a.amount) - Number(b.amount));
@@ -86,104 +81,91 @@ function parsePrices(data, pricesList) {
 
   if (promo && Number(promo.amount) < normal) {
     const por = Number(promo.amount);
-    // "De" = preco normal cadastrado (standard), e nao o regular_amount
-    // inflado que o ML usa apenas como valor "riscado" na vitrine.
     return { precoDe: normal, precoPor: por, priceNum: por };
   }
 
-  // Fallback: logica antiga via original_price
-  const original =
-    data.original_price != null ? Number(data.original_price) : null;
+  const original = data.original_price != null ? Number(data.original_price) : null;
   if (original != null && original > itemPrice) {
     return { precoDe: original, precoPor: itemPrice, priceNum: itemPrice };
   }
-
   return { precoDe: normal, precoPor: 0, priceNum: normal };
 }
 
-// Executa o sync em background.
-// Se "mlbs" for passado, sincroniza apenas esses anuncios (selecao);
-// senao, varre todos os anuncios do vendedor.
-export async function runSync(mlbs = null) {
-  if (syncState.running) return syncState;
+// ================= sync =================
+export async function runSync(userId, mlbs = null) {
+  const current = syncStates.get(userId);
+  if (current?.running) return current;
 
   const selection = Array.isArray(mlbs) && mlbs.length > 0 ? mlbs : null;
 
-  syncState = {
+  const state = {
+    ...idleState(),
     running: true,
     phase: "iniciando",
     escopo: selection ? "selecao" : "todos",
     totalIds: selection ? selection.length : 0,
-    processed: 0,
-    novos: 0,
-    atualizados: 0,
-    fretesMudaram: 0,
     startedAt: new Date(),
-    finishedAt: null,
-    error: null,
   };
+  syncStates.set(userId, state);
 
-  // roda em background; a UI acompanha via /sync/status
-  doSync(selection).catch((e) => {
+  doSync(userId, selection).catch((e) => {
     console.error("[SYNC] erro:", e);
-    syncState.error = e.message;
-    syncState.running = false;
-    syncState.phase = "erro";
-    syncState.finishedAt = new Date();
+    state.error = e.message;
+    state.running = false;
+    state.phase = "erro";
+    state.finishedAt = new Date();
   });
 
-  return syncState;
+  return state;
 }
 
-async function doSync(selection) {
-  const settings = await getSettings();
+async function doSync(userId, selection) {
+  const state = syncStates.get(userId);
+  const settings = await getSettings(userId);
   const zip = settings.zipCode;
 
   let ids;
   if (selection) {
-    // Sincroniza apenas os MLBs selecionados
     ids = selection.map((m) => String(m).trim().toUpperCase());
-    syncState.totalIds = ids.length;
+    state.totalIds = ids.length;
   } else {
-    syncState.phase = "buscando lista de anuncios";
-    const userId = await getUserId();
-    ids = await getAllItemIds(userId, (count, total) => {
-      syncState.totalIds = total || count;
+    state.phase = "buscando lista de anuncios";
+    const mlUserId = await getMlUserId(userId);
+    ids = await getAllItemIds(userId, mlUserId, (count, total) => {
+      state.totalIds = total || count;
     });
-    syncState.totalIds = ids.length;
+    state.totalIds = ids.length;
   }
 
-  syncState.phase = "buscando detalhes";
-  const details = await getItemsDetails(ids);
+  state.phase = "buscando detalhes";
+  const details = await getItemsDetails(userId, ids);
 
-  syncState.phase = "buscando visitas";
-  const visitsMap = await getVisits(ids);
+  state.phase = "buscando visitas";
+  const visitsMap = await getVisits(userId, ids);
 
-  syncState.phase = "processando";
+  state.phase = "processando";
   for (const data of details) {
     try {
-      await upsertItem(data, zip, visitsMap);
+      await upsertItem(userId, data, zip, visitsMap, state);
     } catch (e) {
       console.warn(`[SYNC] falha no item ${data?.id}: ${e.message}`);
     }
-    syncState.processed++;
+    state.processed++;
   }
 
-  syncState.phase = "concluido";
-  syncState.running = false;
-  syncState.finishedAt = new Date();
+  state.phase = "concluido";
+  state.running = false;
+  state.finishedAt = new Date();
 }
 
-async function upsertItem(data, zip, visitsMap) {
+async function upsertItem(userId, data, zip, visitsMap, state) {
   const mlb = data.id;
   const { sku, marca, variacaoIds, variacaoSkus } = parseAttributes(data);
 
-  // Busca precos/promocoes no endpoint dedicado (/prices)
-  const pricesList = await getItemPrices(mlb);
+  const pricesList = await getItemPrices(userId, mlb);
   const { precoDe, precoPor, priceNum } = parsePrices(data, pricesList);
 
-  // Categoria
-  const path = await getCategoryPath(data.category_id);
+  const path = await getCategoryPath(userId, data.category_id);
   const categoria1 = path[0]?.name || null;
   const categoria2 = path[1]?.name || null;
   const categoria3 = path[2]?.name || null;
@@ -191,20 +173,14 @@ async function upsertItem(data, zip, visitsMap) {
 
   const visitas = Number(visitsMap[mlb]) || 0;
 
-  const existing = await prisma.item.findUnique({ where: { mlb } });
+  const existing = await prisma.item.findUnique({
+    where: { userId_mlb: { userId, mlb } },
+  });
 
-  // Frete. Se a consulta falhar agora (null) mas ja houver um valor salvo,
-  // mantem o anterior em vez de apagar (evita "sumir" o frete em syncs grandes).
-  const freteConsultado = await getShippingCost(mlb, zip, priceNum);
+  // Frete: mantem o anterior se a consulta falhar agora
+  const freteConsultado = await getShippingCost(userId, mlb, zip, priceNum);
   const frete = freteConsultado != null ? freteConsultado : existing?.frete ?? null;
 
-  // Comissao (tarifa de venda) sobre o preco efetivo de venda (promo se houver).
-  // Se falhar, mantem o valor anterior.
-  const fee = await getListingFee(priceNum, data.listing_type_id, data.category_id);
-  const comissao = fee ? fee.amount : existing?.comissao ?? null;
-  const comissaoPct = fee ? fee.pct : existing?.comissaoPct ?? null;
-
-  // Detecta mudanca de frete (so quando conseguimos um valor novo valido)
   let freteAnterior = existing?.frete ?? null;
   let freteMudou = false;
   if (
@@ -215,6 +191,11 @@ async function upsertItem(data, zip, visitsMap) {
   ) {
     freteMudou = true;
   }
+
+  // Comissao: mantem anterior se falhar
+  const fee = await getListingFee(userId, priceNum, data.listing_type_id, data.category_id);
+  const comissao = fee ? fee.amount : existing?.comissao ?? null;
+  const comissaoPct = fee ? fee.pct : existing?.comissaoPct ?? null;
 
   const payload = {
     proprio: true,
@@ -245,46 +226,41 @@ async function upsertItem(data, zip, visitsMap) {
   };
 
   const item = await prisma.item.upsert({
-    where: { mlb },
+    where: { userId_mlb: { userId, mlb } },
     update: payload,
-    create: { mlb, ...payload },
+    create: { userId, mlb, ...payload },
   });
 
-  // Historico de frete (registra sempre que houver valor)
   if (frete != null) {
     const last = await prisma.shippingHistory.findFirst({
       where: { itemId: item.id },
       orderBy: { capturedAt: "desc" },
     });
     if (!last || last.cost !== frete) {
-      await prisma.shippingHistory.create({
-        data: { itemId: item.id, mlb, cost: frete },
-      });
+      await prisma.shippingHistory.create({ data: { itemId: item.id, mlb, cost: frete } });
     }
   }
 
   if (existing) {
-    syncState.atualizados++;
-    if (freteMudou) syncState.fretesMudaram++;
+    state.atualizados++;
+    if (freteMudou) state.fretesMudaram++;
   } else {
-    syncState.novos++;
+    state.novos++;
   }
 }
 
-// ================= Settings =================
-export async function getSettings() {
-  let s = await prisma.settings.findUnique({ where: { id: 1 } });
-  if (!s) {
-    s = await prisma.settings.create({ data: { id: 1 } });
-  }
+// ================= Settings (por usuario) =================
+export async function getSettings(userId) {
+  let s = await prisma.settings.findUnique({ where: { userId } });
+  if (!s) s = await prisma.settings.create({ data: { userId } });
   return s;
 }
 
-export async function updateZipCode(zipCode) {
+export async function updateZipCode(userId, zipCode) {
   const clean = String(zipCode).replace(/\D/g, "") || "01001000";
   return prisma.settings.upsert({
-    where: { id: 1 },
+    where: { userId },
     update: { zipCode: clean },
-    create: { id: 1, zipCode: clean },
+    create: { userId, zipCode: clean },
   });
 }

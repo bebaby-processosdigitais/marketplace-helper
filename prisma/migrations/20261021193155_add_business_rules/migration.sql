@@ -1,9 +1,0 @@
--- CreateTable
-CREATE TABLE "BusinessRule" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT DEFAULT 1,
-    "icms" REAL NOT NULL DEFAULT 0,
-    "ipi" REAL NOT NULL DEFAULT 0,
-    "difal" REAL NOT NULL DEFAULT 0,
-    "custoOperacional" REAL NOT NULL DEFAULT 0,
-    "updatedAt" DATETIME NOT NULL
-);

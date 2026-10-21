@@ -5,6 +5,7 @@ relatórios e dashboards (fretes, comissões, preços/promoções), com exporta�
 
 ## Funcionalidades
 
+- **Multiusuário** — login/cadastro por loja (e-mail + senha); cada usuário só vê os próprios dados.
 - **Anúncios** — listagem paginada (50/pág) com busca por MLB, título ou SKU e ordenação por coluna.
 - **Atualizar** — sincroniza todos os anúncios ou apenas uma seleção, em background com barra de progresso.
 - **Preços e promoções** — captura preço de/por via endpoint de preços (promoções de canal).
@@ -30,19 +31,20 @@ relatórios e dashboards (fretes, comissões, preços/promoções), com exporta�
    npm install
    ```
 
-2. Crie o arquivo `.env` a partir do exemplo e preencha as credenciais do seu app do Mercado Livre:
+2. Crie o arquivo `.env` a partir do exemplo e defina um `SESSION_SECRET` aleatório:
 
    ```bash
    cp .env.example .env
    ```
 
    ```
-   ML_APP_ID=seu_app_id
-   ML_APP_SECRET=seu_app_secret
-   ML_REDIRECT_URI=https://seu-dominio/redirect
    PORT=3333
+   SESSION_SECRET=um_valor_aleatorio_longo
    DATABASE_URL="file:./dev.db"
    ```
+
+   As credenciais do Mercado Livre (App ID, Secret, Redirect URI) são cadastradas
+   por cada usuário dentro do app, na tela **Autorização**.
 
 3. Prepare o banco:
 
@@ -59,10 +61,12 @@ relatórios e dashboards (fretes, comissões, preços/promoções), com exporta�
 
    Acesse `http://localhost:3333`. No Windows, o `INICIAR.BAT` faz tudo isso e abre no Chrome.
 
-## Autorização
+## Primeiro acesso
 
-Na tela **Autorização**, clique em "Autorizar no Mercado Livre", conclua o login e cole o
-código (ou a URL de retorno) para conectar. O token é salvo e renovado automaticamente.
+1. Acesse `http://localhost:3333`, crie sua conta (nome da loja, e-mail e senha).
+2. Em **Autorização**, cadastre o App ID, o Secret e o Redirect URI do seu app do Mercado Livre (Passo 1).
+3. Clique em "Autorizar no Mercado Livre", conclua o login e cole o código (ou a URL de retorno) (Passo 2).
+4. Volte em **Anúncios** e clique em **Atualizar tudo**. O token é salvo e renovado automaticamente.
 
 ## Estrutura
 

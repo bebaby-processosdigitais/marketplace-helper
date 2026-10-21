@@ -2,19 +2,6 @@ import prisma from "../config/prisma.js";
 
 export const PAGE_SIZE = 50;
 
-// Monta o filtro de busca por MLB ou titulo (SQLite: contains sem mode)
-export function buildItemWhere(search) {
-  if (!search || !search.trim()) return {};
-  const q = search.trim();
-  return {
-    OR: [
-      { mlb: { contains: q } },
-      { titulo: { contains: q } },
-      { sku: { contains: q } },
-    ],
-  };
-}
-
 // Colunas permitidas para ordenacao (chave da UI -> campo no banco)
 export const SORTABLE = {
   mlb: "mlb",
@@ -32,12 +19,24 @@ export const SORTABLE = {
   status: "status",
 };
 
-// Lista paginada de itens (com busca e ordenacao por coluna)
-export async function listItems({ page = 1, search = "", sort = "", dir = "" } = {}) {
-  const where = buildItemWhere(search);
+// Filtro: sempre escopado ao usuario + busca opcional por MLB/titulo/SKU
+export function buildItemWhere(userId, search) {
+  const where = { userId };
+  if (search && search.trim()) {
+    const q = search.trim();
+    where.OR = [
+      { mlb: { contains: q } },
+      { titulo: { contains: q } },
+      { sku: { contains: q } },
+    ];
+  }
+  return where;
+}
+
+export async function listItems({ userId, page = 1, search = "", sort = "", dir = "" } = {}) {
+  const where = buildItemWhere(userId, search);
   const currentPage = Math.max(1, Number(page) || 1);
 
-  // Ordenacao: usa coluna da whitelist; senao, padrao por atualizacao recente
   const field = SORTABLE[sort];
   const direction = dir === "asc" ? "asc" : "desc";
   const orderBy = field ? { [field]: direction } : { updatedAt: "desc" };

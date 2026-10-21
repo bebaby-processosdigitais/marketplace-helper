@@ -29,15 +29,23 @@
           </a>
         </li>
       </ul>
-      <% if (typeof authenticated !== 'undefined') { %>
-        <span class="navbar-text">
+      <div class="d-flex align-items-center gap-3">
+        <% if (typeof authenticated !== 'undefined') { %>
           <% if (authenticated) { %>
             <span class="badge text-bg-success"><i class="bi bi-check-circle"></i> Conectado</span>
           <% } else { %>
             <span class="badge text-bg-warning"><i class="bi bi-exclamation-triangle"></i> Não autorizado</span>
           <% } %>
-        </span>
-      <% } %>
+        <% } %>
+        <% if (typeof user !== 'undefined' && user) { %>
+          <span class="navbar-text text-truncate" style="max-width: 180px;" title="<%= user.storeName %>">
+            <i class="bi bi-shop"></i> <%= user.storeName %>
+          </span>
+          <a href="/logout" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-box-arrow-right"></i> Sair
+          </a>
+        <% } %>
+      </div>
     </div>
   </div>
 </nav>

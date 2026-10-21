@@ -2,8 +2,9 @@ import { getBusinessRules, updateBusinessRules } from "../services/rulesService.
 import { getAuthStatus } from "../services/mlAuth.js";
 
 export async function showRules(req, res) {
-  const rules = await getBusinessRules();
-  const status = await getAuthStatus();
+  const userId = req.user.id;
+  const rules = await getBusinessRules(userId);
+  const status = await getAuthStatus(userId);
   res.render("rules", {
     title: "Regras de Negócio",
     rules,
@@ -13,6 +14,6 @@ export async function showRules(req, res) {
 }
 
 export async function saveRules(req, res) {
-  await updateBusinessRules(req.body);
+  await updateBusinessRules(req.user.id, req.body);
   res.redirect("/regras?message=" + encodeURIComponent("Regras salvas com sucesso!"));
 }

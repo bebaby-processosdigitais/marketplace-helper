@@ -1,4 +1,4 @@
-<% var active = 'auth'; var authenticated = status.authenticated; %>
+<% var active = 'auth'; %>
 <%- include('partials/head') %>
 <%- include('partials/nav') %>
 
@@ -18,52 +18,73 @@
       <% if (status.expired) { %>
         Token expirado — será renovado automaticamente no próximo sync.
       <% } else { %>
-        Conectado <% if (status.userId) { %>(usuário <%= status.userId %>)<% } %>.
+        Conectado <% if (status.mlUserId) { %>(usuário ML <%= status.mlUserId %>)<% } %>.
       <% } %>
       <br />
       <small class="text-muted">Autorizado em: <%= new Date(status.savedAt).toLocaleString('pt-BR') %></small>
     </div>
   <% } %>
 
+  <!-- Passo 1: credenciais do app -->
   <div class="card shadow-sm mb-4">
     <div class="card-body">
-      <h5 class="card-title">Passo 1 — Autorizar o app</h5>
-      <div class="alert alert-info py-2 mb-3">
-        <i class="bi bi-info-circle"></i>
-        Confirme no painel do Mercado Livre que a <em>Redirect URI</em> cadastrada é exatamente:
-        <br />
-        <code class="user-select-all"><%= redirectUri %></code>
-      </div>
-      <p class="text-muted mb-2">
-        Clique no botão abaixo, faça login e autorize. O navegador vai redirecionar para
-        o endereço acima com um parâmetro <code>?code=...</code> na barra de endereço.
+      <h5 class="card-title">Passo 1 — Credenciais do seu app</h5>
+      <p class="text-muted mb-3">
+        Informe os dados do seu aplicativo no
+        <a href="https://developers.mercadolivre.com.br/" target="_blank">painel do Mercado Livre</a>.
+        Ficam salvos na sua conta.
       </p>
-      <a href="<%= authUrl %>" target="_blank" class="btn btn-warning fw-semibold">
-        <i class="bi bi-box-arrow-up-right"></i> Autorizar no Mercado Livre
-      </a>
-    </div>
-  </div>
-
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <h5 class="card-title">Passo 2 — Colar o código (ou a URL)</h5>
-      <p class="text-muted mb-2">
-        Depois de autorizar, copie o que aparece na <strong>barra de endereço</strong>.
-        Cole aqui <strong>a URL inteira</strong> (o sistema extrai o código sozinho) ou
-        apenas o que vem depois de <code>code=</code>.
-        <br />
-        <span class="text-danger"><i class="bi bi-clock"></i> O código expira em poucos minutos — cole logo após autorizar.</span>
-      </p>
-      <form action="/auth/code" method="post" class="row g-2">
-        <div class="col-12 col-md-9">
-          <input type="text" name="code" class="form-control" placeholder="Cole a URL ou o código TG-..." required />
+      <form action="/auth/credentials" method="post" class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label">App ID (Client ID)</label>
+          <input type="text" name="appId" class="form-control" value="<%= status.appId %>" required />
         </div>
-        <div class="col-12 col-md-3 d-grid">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Secret Key (Client Secret)</label>
+          <input type="text" name="appSecret" class="form-control" value="<%= status.appSecret %>" required />
+        </div>
+        <div class="col-12">
+          <label class="form-label">Redirect URI</label>
+          <input type="text" name="redirectUri" class="form-control" value="<%= status.redirectUri %>"
+                 placeholder="https://seu-dominio/redirect" required />
+          <small class="text-muted">Deve ser idêntica à cadastrada no painel do ML.</small>
+        </div>
+        <div class="col-12">
           <button type="submit" class="btn btn-primary">
-            <i class="bi bi-key"></i> Conectar
+            <i class="bi bi-save"></i> Salvar credenciais
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Passo 2: autorizar -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Passo 2 — Autorizar</h5>
+      <% if (!status.hasCredentials) { %>
+        <p class="text-muted mb-0">
+          <i class="bi bi-info-circle"></i> Salve as credenciais no Passo 1 para liberar a autorização.
+        </p>
+      <% } else { %>
+        <p class="text-muted mb-2">
+          Clique no botão, faça login e autorize. O navegador vai para o endereço do Redirect URI
+          com um parâmetro <code>?code=...</code> na barra de endereço. Cole a URL inteira (ou só o código) abaixo.
+          <br />
+          <span class="text-danger"><i class="bi bi-clock"></i> O código expira em poucos minutos.</span>
+        </p>
+        <a href="<%= authUrl %>" target="_blank" class="btn btn-warning fw-semibold mb-3">
+          <i class="bi bi-box-arrow-up-right"></i> Autorizar no Mercado Livre
+        </a>
+        <form action="/auth/code" method="post" class="row g-2">
+          <div class="col-12 col-md-9">
+            <input type="text" name="code" class="form-control" placeholder="Cole a URL ou o código TG-..." required />
+          </div>
+          <div class="col-12 col-md-3 d-grid">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-key"></i> Conectar</button>
+          </div>
+        </form>
+      <% } %>
     </div>
   </div>
 </div>
