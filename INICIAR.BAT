@@ -1,0 +1,48 @@
+@echo off
+chcp 65001 >nul
+title Marketplace Helper
+cd /d "%~dp0"
+
+echo ============================================
+echo   Marketplace Helper - Mercado Livre
+echo ============================================
+echo.
+
+REM --- Instala dependencias na primeira vez ---
+if not exist "node_modules\" (
+    echo [1/3] Instalando dependencias ^(primeira vez^)...
+    call npm install
+    echo [2/3] Preparando banco de dados...
+    call npx prisma generate
+    call npx prisma migrate deploy
+) else (
+    echo [OK] Dependencias ja instaladas.
+)
+
+echo.
+echo [3/3] Iniciando servidor na porta 3333...
+start "Servidor ML" cmd /k "npm start"
+
+REM --- Espera o servidor subir ---
+timeout /t 4 /nobreak >nul
+
+echo Abrindo no Google Chrome...
+
+REM --- Abre no Chrome procurando nos caminhos comuns de instalacao ---
+set "URL=http://localhost:3333"
+if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" (
+    start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" "%URL%"
+) else if exist "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" (
+    start "" "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" "%URL%"
+) else if exist "%LocalAppData%\Google\Chrome\Application\chrome.exe" (
+    start "" "%LocalAppData%\Google\Chrome\Application\chrome.exe" "%URL%"
+) else (
+    echo Chrome nao encontrado, abrindo no navegador padrao...
+    start "" "%URL%"
+)
+
+echo.
+echo Pronto! O servidor esta rodando na janela "Servidor ML".
+echo Para encerrar, feche aquela janela.
+timeout /t 3 /nobreak >nul
+exit

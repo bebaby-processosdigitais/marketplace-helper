@@ -1,0 +1,43 @@
+<nav class="navbar navbar-expand-lg navbar-light ml-navbar sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="/">
+      <i class="bi bi-box-seam"></i> Marketplace Helper
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link <%= typeof active !== 'undefined' && active === 'items' ? 'active' : '' %>" href="/">
+            <i class="bi bi-list-ul"></i> Anúncios
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= typeof active !== 'undefined' && active === 'dashboard' ? 'active' : '' %>" href="/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= typeof active !== 'undefined' && active === 'rules' ? 'active' : '' %>" href="/regras">
+            <i class="bi bi-sliders"></i> Regras
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= typeof active !== 'undefined' && active === 'auth' ? 'active' : '' %>" href="/auth">
+            <i class="bi bi-shield-lock"></i> Autorização
+          </a>
+        </li>
+      </ul>
+      <% if (typeof authenticated !== 'undefined') { %>
+        <span class="navbar-text">
+          <% if (authenticated) { %>
+            <span class="badge text-bg-success"><i class="bi bi-check-circle"></i> Conectado</span>
+          <% } else { %>
+            <span class="badge text-bg-warning"><i class="bi bi-exclamation-triangle"></i> Não autorizado</span>
+          <% } %>
+        </span>
+      <% } %>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Tokens OAuth do Mercado Livre (uma linha unica com id=1)
+model Token {
+  id           Int      @id @default(1)
+  accessToken  String
+  refreshToken String
+  userId       String?
+  expiresIn    Int      @default(21600)
+  savedAt      DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Configuracoes gerais da aplicacao (uma linha unica com id=1)
+model Settings {
+  id        Int      @id @default(1)
+  zipCode   String   @default("01001000")
+  updatedAt DateTime @updatedAt
+}
+
+// Regras de negocio: impostos e custos usados nos calculos (linha unica id=1).
+// Todos os valores em porcentagem (%).
+model BusinessRule {
+  id               Int      @id @default(1)
+  icms             Float    @default(0)
+  ipi              Float    @default(0)
+  difal            Float    @default(0)
+  custoOperacional Float    @default(0)
+  updatedAt        DateTime @updatedAt
+}
+
+// Anuncios do Mercado Livre
+model Item {
+  id            Int      @id @default(autoincrement())
+  mlb           String   @unique
+  proprio       Boolean  @default(true)
+  variacaoIds   String?
+  sku           String?
+  variacaoSkus  String?
+  marca         String?
+  titulo        String   @default("")
+  precoDe       Float    @default(0)
+  precoPor      Float    @default(0)
+  frete         Float?
+  freteAnterior Float?
+  freteMudou    Boolean  @default(false)
+  comissao      Float?
+  comissaoPct   Float?
+  status        String?
+  dataCriacao   String?
+  tipoAnuncio   String?
+  visitas       Int      @default(0)
+  vendas        Int      @default(0)
+  estoque       Int      @default(0)
+  catalogo      Boolean  @default(false)
+  full          Boolean  @default(false)
+  categoria1    String?
+  categoria2    String?
+  categoria3    String?
+  categoria4    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  shippingHistory ShippingHistory[]
+
+  @@index([titulo])
+  @@index([frete])
+}
+
+// Historico de fretes para detectar mudancas ao longo do tempo
+model ShippingHistory {
+  id         Int      @id @default(autoincrement())
+  itemId     Int
+  mlb        String
+  cost       Float
+  capturedAt DateTime @default(now())
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([mlb])
+  @@index([capturedAt])
+}

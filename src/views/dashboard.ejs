@@ -1,0 +1,135 @@
+<% var active = 'dashboard'; %>
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+
+<div class="container-fluid py-3 px-md-4">
+  <h3 class="mb-3"><i class="bi bi-speedometer2"></i> Dashboard de Fretes</h3>
+
+  <!-- Cards resumo -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="kpi-label">Anúncios</div>
+        <div class="kpi-value"><%= total %></div>
+      </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="kpi-label">Frete médio</div>
+        <div class="kpi-value">R$ <%= freteMedio.toFixed(2) %></div>
+      </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="kpi-label">Frete mais caro</div>
+        <div class="kpi-value">R$ <%= freteMax.toFixed(2) %></div>
+      </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="kpi-label">Anúncios FULL</div>
+        <div class="kpi-value"><%= full %></div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Fretes mais caros -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-semibold bg-white">
+          <i class="bi bi-fire text-danger"></i> Fretes mais caros (Top 10)
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0 align-middle">
+            <thead class="table-light">
+              <tr><th>MLB</th><th>Título</th><th class="text-end">Frete</th></tr>
+            </thead>
+            <tbody>
+              <% if (fretesMaisCaros.length === 0) { %>
+                <tr><td colspan="3" class="text-center text-muted py-3">Sem dados. Rode um Atualizar.</td></tr>
+              <% } %>
+              <% fretesMaisCaros.forEach(function(it) { %>
+                <tr>
+                  <td><small><%= it.mlb %></small></td>
+                  <td class="text-truncate" style="max-width: 260px;" title="<%= it.titulo %>"><%= it.titulo %></td>
+                  <td class="text-end fw-semibold text-danger">R$ <%= it.frete.toFixed(2) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fretes que mudaram -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-semibold bg-white d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-arrow-left-right text-primary"></i> Fretes que mudaram</span>
+          <% if (fretesMudaram.length) { %>
+            <span class="badge <%= deltaTotal > 0 ? 'text-bg-danger' : 'text-bg-success' %>">
+              Δ total: R$ <%= deltaTotal.toFixed(2) %>
+            </span>
+          <% } %>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0 align-middle">
+            <thead class="table-light">
+              <tr><th>MLB</th><th>Título</th><th class="text-end">Antes</th><th class="text-end">Agora</th><th class="text-end">Δ</th></tr>
+            </thead>
+            <tbody>
+              <% if (fretesMudaram.length === 0) { %>
+                <tr><td colspan="5" class="text-center text-muted py-3">Nenhuma mudança detectada no último sync.</td></tr>
+              <% } %>
+              <% fretesMudaram.forEach(function(it) { %>
+                <% var up = it.frete > it.freteAnterior; %>
+                <tr>
+                  <td><small><%= it.mlb %></small></td>
+                  <td class="text-truncate" style="max-width: 200px;" title="<%= it.titulo %>"><%= it.titulo %></td>
+                  <td class="text-end text-muted">R$ <%= it.freteAnterior.toFixed(2) %></td>
+                  <td class="text-end fw-semibold">R$ <%= it.frete.toFixed(2) %></td>
+                  <td class="text-end">
+                    <span class="badge <%= up ? 'text-bg-danger' : 'text-bg-success' %>">
+                      <i class="bi bi-arrow-<%= up ? 'up' : 'down' %>"></i>
+                      <%= Math.abs(it.frete - it.freteAnterior).toFixed(2) %>
+                    </span>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribuicao por tipo + totais -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-semibold bg-white"><i class="bi bi-pie-chart"></i> Por tipo de anúncio</div>
+        <ul class="list-group list-group-flush">
+          <% porTipo.forEach(function(t) { %>
+            <li class="list-group-item d-flex justify-content-between">
+              <span><%= t.tipo %></span><span class="badge text-bg-primary rounded-pill"><%= t.count %></span>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-semibold bg-white"><i class="bi bi-bar-chart-line"></i> Totais</div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between"><span>Estoque total</span><strong><%= estoqueTotal %></strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>Vendas totais</span><strong><%= vendasTotal %></strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>Visitas totais</span><strong><%= visitasTotal %></strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>Frete mínimo</span><strong>R$ <%= freteMin.toFixed(2) %></strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>Soma dos fretes</span><strong>R$ <%= freteSoma.toFixed(2) %></strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,295 @@
+/* ===== Marketplace Helper — tema minimalista (ver design.md) ===== */
+:root {
+  --mh-bg: #f8fafc;
+  --mh-surface: #ffffff;
+  --mh-text: #0f1729;
+  --mh-muted: #65758b;
+  --mh-border: #e1e7ef;
+  --mh-primary: #1f2f56;
+  --mh-primary-hover: #182540;
+  --mh-primary-soft: #eef1f6;
+  --mh-success: #15803d;
+  --mh-danger: #dc2626;
+  --mh-radius: 12px;
+  --mh-radius-sm: 10px;
+  --mh-shadow-card: 0 1px 3px rgba(15, 23, 41, 0.06), 0 1px 2px rgba(15, 23, 41, 0.04);
+
+  /* Overrides do Bootstrap */
+  --bs-primary: var(--mh-primary);
+  --bs-body-bg: var(--mh-bg);
+  --bs-body-color: var(--mh-text);
+  --bs-border-color: var(--mh-border);
+}
+
+body {
+  background: var(--mh-bg);
+  color: var(--mh-text);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--mh-text);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ===== Navbar ===== */
+.ml-navbar {
+  background: var(--mh-surface) !important;
+  border-bottom: 1px solid var(--mh-border);
+  box-shadow: none;
+}
+
+.ml-navbar .navbar-brand {
+  color: var(--mh-text) !important;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.ml-navbar .navbar-brand i {
+  color: var(--mh-primary);
+}
+
+.ml-navbar .nav-link {
+  color: var(--mh-muted) !important;
+  font-weight: 500;
+  border-radius: var(--mh-radius-sm);
+  padding: 6px 14px;
+}
+
+.ml-navbar .nav-link:hover {
+  color: var(--mh-text) !important;
+  background: var(--mh-primary-soft);
+}
+
+.ml-navbar .nav-link.active {
+  color: var(--mh-primary) !important;
+  font-weight: 600;
+  background: transparent;
+}
+
+/* ===== Botões ===== */
+.btn {
+  border-radius: var(--mh-radius-sm);
+  font-weight: 600;
+  box-shadow: none !important;
+}
+
+.btn-primary,
+.btn-warning {
+  background: var(--mh-primary);
+  border-color: var(--mh-primary);
+  color: #fff;
+}
+
+.btn-primary:hover,
+.btn-warning:hover,
+.btn-primary:focus,
+.btn-warning:focus {
+  background: var(--mh-primary-hover);
+  border-color: var(--mh-primary-hover);
+  color: #fff;
+}
+
+.btn-success {
+  background: var(--mh-success);
+  border-color: var(--mh-success);
+  color: #fff;
+}
+
+.btn-success:hover {
+  filter: brightness(0.94);
+  color: #fff;
+}
+
+.btn-outline-secondary,
+.btn-outline-primary,
+.btn-outline-danger {
+  border-color: var(--mh-border);
+  color: var(--mh-text);
+  background: var(--mh-surface);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-primary:hover,
+.btn-outline-danger:hover {
+  background: var(--mh-primary-soft);
+  border-color: var(--mh-border);
+  color: var(--mh-text);
+}
+
+/* ===== Cards / KPI ===== */
+.card {
+  border: 1px solid var(--mh-border);
+  border-radius: var(--mh-radius);
+  box-shadow: var(--mh-shadow-card);
+}
+
+.card-header {
+  background: var(--mh-surface) !important;
+  border-bottom: 1px solid var(--mh-border);
+  font-weight: 600;
+}
+
+.kpi .kpi-label {
+  font-size: 0.72rem;
+  color: var(--mh-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.kpi .kpi-value {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--mh-primary);
+  letter-spacing: -0.02em;
+}
+
+/* ===== Tabela ===== */
+.table {
+  --bs-table-bg: var(--mh-surface);
+  color: var(--mh-text);
+  border-color: var(--mh-border);
+  margin-bottom: 0;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.6rem 0.75rem;
+}
+
+.table thead th {
+  white-space: nowrap;
+  background: var(--mh-primary-soft);
+  color: var(--mh-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  border-bottom: 1px solid var(--mh-border);
+}
+
+.table tbody td {
+  border-top: 1px solid var(--mh-border);
+  vertical-align: middle;
+}
+
+.table-hover > tbody > tr:hover > * {
+  background: var(--mh-primary-soft);
+}
+
+.table-responsive {
+  border: 1px solid var(--mh-border);
+  border-radius: var(--mh-radius);
+  overflow: hidden;
+}
+
+table a {
+  color: var(--mh-primary);
+  font-weight: 500;
+}
+
+/* Cabecalhos clicaveis (ordenacao) */
+.sort-link {
+  color: var(--mh-muted) !important;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.sort-link:hover {
+  color: var(--mh-text) !important;
+}
+
+.sort-ico {
+  font-size: 0.65rem;
+  opacity: 0.4;
+}
+
+.sort-ico.active {
+  opacity: 1;
+  color: var(--mh-primary);
+}
+
+.row-check,
+#checkAll {
+  cursor: pointer;
+}
+
+/* ===== Badges / pílulas ===== */
+.badge {
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.35em 0.7em;
+}
+
+.text-bg-success {
+  background: #dcfce7 !important;
+  color: var(--mh-success) !important;
+}
+
+.text-bg-danger {
+  background: #fee2e2 !important;
+  color: var(--mh-danger) !important;
+}
+
+.text-bg-secondary {
+  background: var(--mh-primary-soft) !important;
+  color: var(--mh-muted) !important;
+}
+
+.text-bg-warning {
+  background: #fef3c7 !important;
+  color: #92650e !important;
+}
+
+.text-bg-primary {
+  background: var(--mh-primary-soft) !important;
+  color: var(--mh-primary) !important;
+}
+
+/* ===== Inputs ===== */
+.form-control,
+.input-group-text {
+  border-color: var(--mh-border);
+  border-radius: var(--mh-radius-sm);
+}
+
+.form-control:focus {
+  border-color: var(--mh-primary);
+  box-shadow: 0 0 0 0.2rem rgba(31, 47, 86, 0.12);
+}
+
+.input-group-text {
+  background: var(--mh-surface);
+  color: var(--mh-muted);
+}
+
+/* ===== Alerts ===== */
+.alert {
+  border-radius: var(--mh-radius);
+  border: 1px solid var(--mh-border);
+}
+
+/* ===== Paginação ===== */
+.page-link {
+  color: var(--mh-muted);
+  border-color: var(--mh-border);
+}
+
+.page-item.active .page-link {
+  background: var(--mh-primary);
+  border-color: var(--mh-primary);
+}
+
+.progress {
+  background: var(--mh-primary-soft);
+}
+
+.progress-bar {
+  background: var(--mh-primary);
+}
