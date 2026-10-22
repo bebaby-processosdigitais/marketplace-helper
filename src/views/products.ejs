@@ -1,0 +1,103 @@
+<% var active = 'products'; %>
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+
+<div class="container-fluid py-3 px-md-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-1">
+    <h3 class="mb-0"><i class="bi bi-box2"></i> Produtos</h3>
+  </div>
+  <p class="text-muted">
+    Cada produto agrupa os anúncios com o mesmo <strong>SKU</strong>. Preencha o custo aqui e ele é
+    aplicado a <strong>todos os anúncios</strong> daquele SKU (Clássico, Premium, variações).
+  </p>
+
+  <!-- Busca -->
+  <form class="mb-3" method="get" action="/produtos" role="search">
+    <div class="input-group" style="max-width: 520px;">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="text" name="search" class="form-control" placeholder="Buscar por SKU, nome ou MLB..." value="<%= search %>" />
+      <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+      <% if (search) { %><a href="/produtos" class="btn btn-outline-danger" title="Limpar"><i class="bi bi-x-lg"></i></a><% } %>
+    </div>
+  </form>
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <small class="text-muted">
+      <strong><%= total %></strong> produto(s)<% if (search) { %> para "<strong><%= search %></strong>"<% } %>
+      · página <%= page %> de <%= totalPages %>
+    </small>
+    <% if (semSku > 0) { %>
+      <small class="text-muted"><i class="bi bi-info-circle"></i> <%= semSku %> anúncio(s) sem SKU — edite o custo deles na tela de <a href="/">Anúncios</a>.</small>
+    <% } %>
+  </div>
+
+  <!-- Tabela -->
+  <div class="table-responsive shadow-sm rounded">
+    <table class="table table-hover table-sm align-middle bg-white mb-0">
+      <thead>
+        <tr>
+          <th style="width: 48px;"></th>
+          <th>SKU</th>
+          <th>Produto</th>
+          <th class="text-center">Anúncios</th>
+          <th class="text-end" style="width: 160px;">Custo do produto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (products.length === 0) { %>
+          <tr><td colspan="5" class="text-center text-muted py-4">
+            Nenhum produto com SKU. Rode um <strong>Atualizar tudo</strong> na tela de Anúncios.
+          </td></tr>
+        <% } %>
+        <% products.forEach(function(p) { %>
+          <tr>
+            <td>
+              <% if (p.thumbnail) { %>
+                <img src="<%= p.thumbnail %>" alt="" style="width:40px;height:40px;object-fit:contain;background:#fff;border:1px solid var(--mh-border);border-radius:6px;" />
+              <% } else { %>
+                <div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--mh-primary-soft);border-radius:6px;color:var(--mh-muted);"><i class="bi bi-image"></i></div>
+              <% } %>
+            </td>
+            <td class="fw-semibold"><%= p.sku %></td>
+            <td class="text-truncate" style="max-width: 360px;" title="<%= p.nome %>"><%= p.nome %></td>
+            <td class="text-center">
+              <a href="/?search=<%= encodeURIComponent(p.sku) %>" class="badge text-bg-primary text-decoration-none" title="Ver anúncios deste SKU">
+                <%= p.qtd %>
+              </a>
+            </td>
+            <td class="text-end">
+              <div class="input-group input-group-sm produto-custo-group">
+                <span class="input-group-text">R$</span>
+                <input type="text" inputmode="decimal" class="form-control produto-custo-input text-end"
+                       data-sku="<%= p.sku %>"
+                       value="<%= p.custo != null ? p.custo.toFixed(2) : '' %>"
+                       placeholder="0,00"
+                       title="<%= p.custoMisto ? 'Custos diferentes entre os anúncios deste SKU — salvar unifica todos' : '' %>" />
+              </div>
+              <% if (p.custoMisto) { %><small class="text-warning d-block">custos divergentes</small><% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginacao -->
+  <% if (totalPages > 1) { %>
+    <% function pageUrl(pg) { return '/produtos?page=' + pg + (search ? '&search=' + encodeURIComponent(search) : ''); } %>
+    <nav class="mt-3">
+      <ul class="pagination justify-content-center flex-wrap">
+        <li class="page-item <%= page <= 1 ? 'disabled' : '' %>"><a class="page-link" href="<%= pageUrl(page - 1) %>">Anterior</a></li>
+        <%
+          var start = Math.max(1, page - 3);
+          var end = Math.min(totalPages, page + 3);
+          for (var pg = start; pg <= end; pg++) { %>
+            <li class="page-item <%= pg === page ? 'active' : '' %>"><a class="page-link" href="<%= pageUrl(pg) %>"><%= pg %></a></li>
+          <% } %>
+        <li class="page-item <%= page >= totalPages ? 'disabled' : '' %>"><a class="page-link" href="<%= pageUrl(page + 1) %>">Próxima</a></li>
+      </ul>
+    </nav>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

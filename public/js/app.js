@@ -195,4 +195,48 @@
       }
     });
   });
+
+})();
+
+// ============ Custo por SKU (página Produtos) -> aplica a todos ============
+// IIFE próprio: independe dos botões de sync (que não existem nessa página).
+(function () {
+  const inputs = document.querySelectorAll(".produto-custo-input");
+  if (!inputs.length) return;
+
+  async function salvarCustoSku(input) {
+    const sku = input.dataset.sku;
+    input.classList.remove("is-invalid", "is-valid");
+    input.classList.add("saving");
+    try {
+      const res = await fetch("/produtos/custo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sku, custo: input.value }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "falha");
+
+      input.value = data.custoProduto != null ? data.custoProduto.toFixed(2) : "";
+      input.classList.add("is-valid");
+      const aviso = input.closest("td")?.querySelector(".text-warning");
+      if (aviso) aviso.remove();
+      input.setAttribute("title", "Aplicado a " + data.afetados + " anúncio(s)");
+      setTimeout(() => input.classList.remove("is-valid"), 1500);
+    } catch (e) {
+      input.classList.add("is-invalid");
+    } finally {
+      input.classList.remove("saving");
+    }
+  }
+
+  inputs.forEach(function (input) {
+    input.addEventListener("change", () => salvarCustoSku(input));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        input.blur();
+      }
+    });
+  });
 })();

@@ -24,6 +24,7 @@ import {
 import { exportExcel } from "../controllers/exportController.js";
 import { showRules, saveRules } from "../controllers/rulesController.js";
 import { showSimulator, runSimulator } from "../controllers/simulatorController.js";
+import { showProducts, saveProductCost } from "../controllers/productController.js";
 
 const router = Router();
 
@@ -40,6 +41,7 @@ router.use(requireAuth);
 
 router.get("/", showItems);
 router.get("/dashboard", showDashboard);
+router.get("/produtos", showProducts);
 router.get("/regras", showRules);
 router.get("/simulador", showSimulator);
 router.get("/auth", showAuthPage);
@@ -52,6 +54,7 @@ router.post("/sync/selection", startSyncSelection);
 router.get("/sync/status", syncStatus);
 router.post("/settings/zip", saveZipCode);
 router.post("/items/custo", saveCusto);
+router.post("/produtos/custo", saveProductCost);
 router.post("/regras", saveRules);
 router.post("/simulador", runSimulator);
 router.get("/export", exportExcel);
