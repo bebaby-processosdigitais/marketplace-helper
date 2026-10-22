@@ -473,6 +473,34 @@ table a {
   min-height: 2.4em;
 }
 
+/* ===== Olho mágico (mostrar/ocultar senha) ===== */
+.pw-wrap {
+  position: relative;
+}
+
+.pw-input {
+  padding-right: 2.4rem !important;
+}
+
+.pw-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 2.4rem;
+  border: 0;
+  background: transparent;
+  color: var(--mh-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pw-toggle:hover {
+  color: var(--mh-primary);
+}
+
 /* ===== Login / Cadastro ===== */
 .auth-wrap {
   min-height: 100vh;

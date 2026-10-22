@@ -190,3 +190,29 @@
     });
   });
 })();
+
+// ============ Olho mágico: mostrar/ocultar senha ============
+(function () {
+  document.querySelectorAll('input[type="password"]').forEach(function (input) {
+    const wrap = document.createElement("div");
+    wrap.className = "pw-wrap";
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    input.classList.add("pw-input");
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "pw-toggle";
+    btn.tabIndex = -1;
+    btn.setAttribute("aria-label", "Mostrar senha");
+    btn.innerHTML = '<i class="bi bi-eye"></i>';
+    wrap.appendChild(btn);
+
+    btn.addEventListener("click", function () {
+      const mostrar = input.type === "password";
+      input.type = mostrar ? "text" : "password";
+      btn.innerHTML = mostrar ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+      btn.setAttribute("aria-label", mostrar ? "Ocultar senha" : "Mostrar senha");
+    });
+  });
+})();
