@@ -30,6 +30,7 @@ import { exportExcel } from "../controllers/exportController.js";
 import { showRules, saveRules } from "../controllers/rulesController.js";
 import { showSimulator, runSimulator } from "../controllers/simulatorController.js";
 import { showProducts, saveProductCost } from "../controllers/productController.js";
+import { showFrete } from "../controllers/freteController.js";
 
 const router = Router();
 
@@ -51,6 +52,7 @@ router.get("/dashboard", showDashboard);
 router.get("/produtos", showProducts);
 router.get("/regras", showRules);
 router.get("/simulador", showSimulator);
+router.get("/frete", showFrete);
 router.get("/auth", showAuthPage);
 router.get("/callback", oauthCallback);
 router.get("/conta", showAccount);

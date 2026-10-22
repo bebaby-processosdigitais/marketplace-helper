@@ -421,6 +421,13 @@ table a {
   letter-spacing: 0.02em;
 }
 
+/* ===== Calculadora de frete: célula destacada ===== */
+.fc-hit {
+  background: var(--mh-primary) !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+
 /* ===== Insights inteligentes ===== */
 .insight-item {
   transition: background 0.15s;
