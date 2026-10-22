@@ -3,7 +3,7 @@ import {
   getMlUserId,
   getAllItemIds,
   getItemsDetails,
-  getVisits,
+  getItemVisits,
   getShippingCost,
   getItemPrices,
   getListingFee,
@@ -140,13 +140,10 @@ async function doSync(userId, selection) {
   state.phase = "buscando detalhes";
   const details = await getItemsDetails(userId, ids);
 
-  state.phase = "buscando visitas";
-  const visitsMap = await getVisits(userId, ids);
-
   state.phase = "processando";
   for (const data of details) {
     try {
-      await upsertItem(userId, data, zip, visitsMap, state);
+      await upsertItem(userId, data, zip, state);
     } catch (e) {
       console.warn(`[SYNC] falha no item ${data?.id}: ${e.message}`);
     }
@@ -158,7 +155,7 @@ async function doSync(userId, selection) {
   state.finishedAt = new Date();
 }
 
-async function upsertItem(userId, data, zip, visitsMap, state) {
+async function upsertItem(userId, data, zip, state) {
   const mlb = data.id;
   const { sku, marca, variacaoIds, variacaoSkus } = parseAttributes(data);
 
@@ -170,8 +167,6 @@ async function upsertItem(userId, data, zip, visitsMap, state) {
   const categoria2 = path[1]?.name || null;
   const categoria3 = path[2]?.name || null;
   const categoria4 = path[3]?.name || null;
-
-  const visitas = Number(visitsMap[mlb]) || 0;
 
   const existing = await prisma.item.findUnique({
     where: { userId_mlb: { userId, mlb } },
@@ -196,6 +191,10 @@ async function upsertItem(userId, data, zip, visitsMap, state) {
   const fee = await getListingFee(userId, priceNum, data.listing_type_id, data.category_id);
   const comissao = fee ? fee.amount : existing?.comissao ?? null;
   const comissaoPct = fee ? fee.pct : existing?.comissaoPct ?? null;
+
+  // Visitas (1 por chamada): mantem anterior se falhar
+  const visitasConsultado = await getItemVisits(userId, mlb);
+  const visitas = visitasConsultado != null ? visitasConsultado : existing?.visitas ?? 0;
 
   // Imagem de capa (prefere a foto em alta; cai pro thumbnail seguro)
   const thumbnail =

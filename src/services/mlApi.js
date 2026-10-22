@@ -87,15 +87,14 @@ export async function getItemsDetails(userId, mlbs) {
   return items;
 }
 
-// Visitas de varios itens
-export async function getVisits(userId, mlbs) {
-  const result = {};
-  const chunks = chunk(mlbs, 50);
-  for (const group of chunks) {
-    const data = await apiGet(userId, `${API}/visits/items?ids=${group.join(",")}`);
-    if (data && typeof data === "object") Object.assign(result, data);
+// Visitas de UM item (o endpoint /visits/items aceita apenas 1 id por chamada).
+// Retorna o total de visitas, ou null se a consulta falhar.
+export async function getItemVisits(userId, mlb) {
+  const data = await apiGet(userId, `${API}/visits/items?ids=${mlb}`);
+  if (data && typeof data === "object" && mlb in data) {
+    return Number(data[mlb]) || 0;
   }
-  return result;
+  return null;
 }
 
 // Custo de frete (com fallback por faixa de preco para itens baratos)

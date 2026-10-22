@@ -57,6 +57,7 @@ export async function getDashboardData(userId) {
   }));
 
   const full = await prisma.item.count({ where: { userId, full: true } });
+  const catalogo = await prisma.item.count({ where: { userId, catalogo: true } });
 
   let deltaTotal = 0;
   for (const f of fretesMudaram) {
@@ -68,6 +69,7 @@ export async function getDashboardData(userId) {
     total,
     comFrete,
     full,
+    catalogo,
     fretesMaisCaros,
     fretesMudaram,
     deltaTotal,

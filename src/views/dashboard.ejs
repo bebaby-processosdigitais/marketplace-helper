@@ -159,6 +159,14 @@
               <span><%= t.tipo %></span><span class="badge text-bg-primary rounded-pill"><%= t.count %></span>
             </li>
           <% }); %>
+          <li class="list-group-item d-flex justify-content-between bg-light">
+            <span><i class="bi bi-box-seam text-success"></i> No Full</span>
+            <span class="badge text-bg-success rounded-pill"><%= full %></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between bg-light">
+            <span><i class="bi bi-stars text-primary"></i> No Catálogo</span>
+            <span class="badge text-bg-primary rounded-pill"><%= catalogo %></span>
+          </li>
         </ul>
       </div>
     </div>
