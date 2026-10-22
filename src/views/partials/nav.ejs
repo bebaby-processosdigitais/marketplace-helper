@@ -48,9 +48,9 @@
           <% } %>
         <% } %>
         <% if (typeof user !== 'undefined' && user) { %>
-          <span class="navbar-text text-truncate" style="max-width: 180px;" title="<%= user.storeName %>">
-            <i class="bi bi-shop"></i> <%= user.storeName %>
-          </span>
+          <a href="/conta" class="navbar-text text-truncate text-decoration-none <%= typeof active !== 'undefined' && active === 'account' ? 'fw-semibold' : '' %>" style="max-width: 180px;" title="Minha conta">
+            <i class="bi bi-person-circle"></i> <%= user.storeName %>
+          </a>
           <a href="/logout" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-box-arrow-right"></i> Sair
           </a>

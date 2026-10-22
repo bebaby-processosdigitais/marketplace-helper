@@ -6,6 +6,11 @@ import {
   showRegister,
   register,
   logout,
+  showAccount,
+  updateAccountProfile,
+  updateAccountPassword,
+  showForgot,
+  submitForgot,
 } from "../controllers/accountController.js";
 import { showItems, saveCusto } from "../controllers/itemsController.js";
 import { showDashboard } from "../controllers/dashboardController.js";
@@ -33,6 +38,8 @@ router.get("/login", showLogin);
 router.post("/login", login);
 router.get("/register", showRegister);
 router.post("/register", register);
+router.get("/recuperar-senha", showForgot);
+router.post("/recuperar-senha", submitForgot);
 router.get("/logout", logout);
 router.post("/logout", logout);
 
@@ -46,6 +53,9 @@ router.get("/regras", showRules);
 router.get("/simulador", showSimulator);
 router.get("/auth", showAuthPage);
 router.get("/callback", oauthCallback);
+router.get("/conta", showAccount);
+router.post("/conta/perfil", updateAccountProfile);
+router.post("/conta/senha", updateAccountPassword);
 
 router.post("/auth/credentials", saveMlCredentials);
 router.post("/auth/code", submitCode);

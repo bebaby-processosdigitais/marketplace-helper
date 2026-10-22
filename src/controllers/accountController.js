@@ -3,6 +3,8 @@ import {
   findByEmail,
   verifyPassword,
   validatePassword,
+  updateProfile,
+  changePassword,
 } from "../services/accountService.js";
 
 export function showLogin(req, res) {
@@ -55,4 +57,56 @@ export async function register(req, res) {
 export function logout(req, res) {
   req.session = null;
   res.redirect("/login?message=" + encodeURIComponent("Você saiu da conta."));
+}
+
+// ===== Minha conta =====
+export function showAccount(req, res) {
+  res.render("account", {
+    title: "Minha Conta",
+    message: req.query.message || null,
+    error: req.query.error || null,
+  });
+}
+
+export async function updateAccountProfile(req, res) {
+  const { storeName, email } = req.body;
+  if (!storeName || !email) {
+    return res.redirect("/conta?error=" + encodeURIComponent("Preencha nome da loja e e-mail."));
+  }
+  const existing = await findByEmail(email);
+  if (existing && existing.id !== req.user.id) {
+    return res.redirect("/conta?error=" + encodeURIComponent("Esse e-mail já está em uso por outra conta."));
+  }
+  try {
+    await updateProfile(req.user.id, { storeName, email });
+    res.redirect("/conta?message=" + encodeURIComponent("Dados atualizados com sucesso!"));
+  } catch (e) {
+    res.redirect("/conta?error=" + encodeURIComponent("Não foi possível salvar."));
+  }
+}
+
+export async function updateAccountPassword(req, res) {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  if (!(await verifyPassword(req.user, currentPassword))) {
+    return res.redirect("/conta?error=" + encodeURIComponent("Senha atual incorreta."));
+  }
+  if (newPassword !== confirmPassword) {
+    return res.redirect("/conta?error=" + encodeURIComponent("A nova senha e a confirmação não conferem."));
+  }
+  const pwError = validatePassword(newPassword);
+  if (pwError) {
+    return res.redirect("/conta?error=" + encodeURIComponent(pwError));
+  }
+  await changePassword(req.user.id, newPassword);
+  res.redirect("/conta?message=" + encodeURIComponent("Senha alterada com sucesso!"));
+}
+
+// ===== Recuperação de senha (placeholder — envio por e-mail ainda não configurado) =====
+export function showForgot(req, res) {
+  if (req.session?.userId) return res.redirect("/");
+  res.render("forgot", { title: "Recuperar senha", sent: false, email: "" });
+}
+
+export function submitForgot(req, res) {
+  res.render("forgot", { title: "Recuperar senha", sent: true, email: req.body.email || "" });
 }

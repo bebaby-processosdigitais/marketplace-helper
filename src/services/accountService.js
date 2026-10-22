@@ -34,3 +34,15 @@ export async function verifyPassword(user, password) {
   if (!user || !password) return false;
   return bcrypt.compare(password, user.passwordHash);
 }
+
+export async function updateProfile(userId, { storeName, email }) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { storeName: storeName.trim(), email: email.toLowerCase().trim() },
+  });
+}
+
+export async function changePassword(userId, newPassword) {
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  return prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+}
