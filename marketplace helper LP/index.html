@@ -20,9 +20,10 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#lpnav"><span class="navbar-toggler-icon"></span></button>
       <div class="collapse navbar-collapse" id="lpnav">
         <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+          <li class="nav-item"><a class="nav-link" href="#problema">O problema</a></li>
           <li class="nav-item"><a class="nav-link" href="#recursos">Recursos</a></li>
           <li class="nav-item"><a class="nav-link" href="#como-funciona">Como funciona</a></li>
-          <li class="nav-item"><a class="nav-link" href="#planos">Planos</a></li>
+          <li class="nav-item"><a class="nav-link" href="#faq">Dúvidas</a></li>
           <li class="nav-item ms-lg-2"><a class="btn btn-primary px-3" href="/login" data-app-link><i class="bi bi-box-arrow-in-right"></i> Entrar no sistema</a></li>
         </ul>
       </div>
@@ -70,6 +71,43 @@
       </div>
     </div>
   </header>
+
+  <!-- O problema -->
+  <section id="problema" class="py-6 bg-soft">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="badge-pill mb-3"><i class="bi bi-exclamation-triangle"></i> O problema</span>
+        <h2 class="fw-bold">Vender sem saber a margem é vender no escuro</h2>
+        <p class="text-muted">A comissão, o frete e os impostos corroem seu lucro — e quase sempre você só descobre no fim do mês.</p>
+      </div>
+      <div class="row g-4 justify-content-center">
+        <div class="col-lg-5">
+          <div class="compare-card compare-bad h-100">
+            <h5 class="mb-3"><i class="bi bi-emoji-frown"></i> Sem o Marketplace Helper</h5>
+            <ul class="compare-list">
+              <li><i class="bi bi-x-circle"></i> Você não sabe quanto cada anúncio realmente lucra</li>
+              <li><i class="bi bi-x-circle"></i> Produtos vendendo no prejuízo passam despercebidos</li>
+              <li><i class="bi bi-x-circle"></i> Horas perdidas montando planilhas manuais</li>
+              <li><i class="bi bi-x-circle"></i> Reajuste de preço no "achismo"</li>
+              <li><i class="bi bi-x-circle"></i> Comissão e frete que você nem contabiliza</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="compare-card compare-good h-100">
+            <h5 class="mb-3"><i class="bi bi-emoji-smile"></i> Com o Marketplace Helper</h5>
+            <ul class="compare-list">
+              <li><i class="bi bi-check-circle"></i> Lucro e margem de cada anúncio, calculados pra você</li>
+              <li><i class="bi bi-check-circle"></i> Alertas dos itens no prejuízo ou com margem baixa</li>
+              <li><i class="bi bi-check-circle"></i> Tudo sincronizado automático, sem planilha</li>
+              <li><i class="bi bi-check-circle"></i> Simule o preço ideal antes de anunciar</li>
+              <li><i class="bi bi-check-circle"></i> Comissão e frete reais na conta, sempre</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Recursos -->
   <section id="recursos" class="py-6">
@@ -134,6 +172,71 @@
           <div class="step-num">3</div>
           <h5 class="mt-3">Lucre com clareza</h5>
           <p class="text-muted">Preencha os custos, veja a margem de cada item e corrija o que está no vermelho.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resultados -->
+  <section id="resultados" class="py-6">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="badge-pill mb-3"><i class="bi bi-trophy"></i> Resultados</span>
+        <h2 class="fw-bold">O que você conquista</h2>
+        <p class="text-muted">Clareza para crescer com margem — não só com faturamento.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3"><div class="result-card h-100">
+          <i class="bi bi-cash-coin"></i>
+          <h6 class="fw-bold mt-2">Pare de vender no prejuízo</h6>
+          <p class="text-muted small mb-0">Identifique na hora os anúncios que dão margem negativa e corrija antes de perder dinheiro.</p>
+        </div></div>
+        <div class="col-md-6 col-lg-3"><div class="result-card h-100">
+          <i class="bi bi-bullseye"></i>
+          <h6 class="fw-bold mt-2">Reajuste com confiança</h6>
+          <p class="text-muted small mb-0">Saiba exatamente o preço mínimo para cada meta de margem, com comissão e frete embutidos.</p>
+        </div></div>
+        <div class="col-md-6 col-lg-3"><div class="result-card h-100">
+          <i class="bi bi-clock-history"></i>
+          <h6 class="fw-bold mt-2">Economize horas</h6>
+          <p class="text-muted small mb-0">Chega de planilhas. Sincronização automática deixa seus números sempre atualizados.</p>
+        </div></div>
+        <div class="col-md-6 col-lg-3"><div class="result-card h-100">
+          <i class="bi bi-graph-up"></i>
+          <h6 class="fw-bold mt-2">Decida com dados</h6>
+          <p class="text-muted small mb-0">Dashboard e insights mostram onde focar para aumentar o lucro do catálogo inteiro.</p>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-6 bg-soft">
+    <div class="container" style="max-width: 760px;">
+      <div class="text-center mb-5">
+        <span class="badge-pill mb-3"><i class="bi bi-patch-question"></i> Dúvidas</span>
+        <h2 class="fw-bold">Perguntas frequentes</h2>
+      </div>
+      <div class="accordion lp-accordion" id="faqAcc">
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q1">Preciso instalar algo?</button></h2>
+          <div id="q1" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body text-muted">Não. O sistema roda no navegador e se conecta à sua conta pela API oficial do Mercado Livre. É só criar sua conta, autorizar e sincronizar.</div></div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2">De onde vêm os números de comissão e frete?</button></h2>
+          <div id="q2" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body text-muted">Direto da API do Mercado Livre — a tarifa de venda real por categoria e o custo de frete do seu anúncio. Nada de estimativa chutada.</div></div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3">Meus dados ficam seguros?</button></h2>
+          <div id="q3" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body text-muted">A conexão com o Mercado Livre é feita pelo fluxo oficial de autorização (OAuth). Seus dados ficam na sua conta do sistema e não são compartilhados.</div></div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4">Preciso entender de tecnologia?</button></h2>
+          <div id="q4" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body text-muted">Não. A ideia é justamente simplificar: você conecta a conta, clica em sincronizar e já vê lucro, margem e alertas prontos.</div></div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5">Consigo exportar os dados?</button></h2>
+          <div id="q5" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body text-muted">Sim. Todos os anúncios, com custos, margens e lucros, podem ser exportados para Excel a qualquer momento.</div></div>
         </div>
       </div>
     </div>
