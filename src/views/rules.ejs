@@ -68,10 +68,104 @@
     </div>
   </form>
 
-  <p class="text-muted mt-3 small">
-    <i class="bi bi-info-circle"></i>
-    Por enquanto esses valores só ficam salvos. Em breve serão usados nos cálculos de margem/custo.
-  </p>
+  <!-- Seção explicativa do cálculo -->
+  <div class="card shadow-sm mt-4">
+    <div class="card-header bg-white fw-semibold">
+      <i class="bi bi-calculator"></i> Como o cálculo financeiro é feito
+    </div>
+    <div class="card-body">
+      <p class="text-muted">
+        Na tela de <strong>Anúncios</strong>, cada item mostra <strong>Lucro Líquido</strong> e
+        <strong>Margem</strong>, calculados assim:
+      </p>
+
+      <ol class="mb-4">
+        <li class="mb-2">
+          <strong>Base de venda</strong> — usamos o <strong>Preço Por</strong> (preço promocional).
+          Se o anúncio não estiver em promoção, usamos o <strong>Preço De</strong>.
+        </li>
+        <li class="mb-2">
+          <strong>Impostos</strong> — somamos as alíquotas que você cadastra aqui
+          (ICMS + IPI + DIFAL + Custo Operacional) e aplicamos esse percentual sobre a base de venda.
+        </li>
+        <li class="mb-2">
+          <strong>Lucro Líquido</strong> = Base − Custo do produto − Comissão do ML − Frete − Impostos.
+        </li>
+        <li>
+          <strong>Margem</strong> = Lucro Líquido ÷ Base × 100.
+        </li>
+      </ol>
+
+      <div class="bg-light rounded p-3 mb-4" style="font-family: ui-monospace, monospace; font-size: 0.85rem;">
+        Lucro = Base − Custo − Comissão − Frete − Impostos<br />
+        Margem&nbsp;% = (Lucro ÷ Base) × 100
+      </div>
+
+      <h6 class="fw-semibold mb-2"><i class="bi bi-lightbulb text-warning"></i> Exemplo (com as suas alíquotas atuais)</h6>
+      <p class="text-muted small mb-2">
+        Produto de exemplo: preço de venda R$ <%= exemplo.precoPor.toFixed(2) %>,
+        custo R$ <%= exemplo.custo.toFixed(2) %>, comissão R$ <%= exemplo.comissao.toFixed(2) %>,
+        frete R$ <%= exemplo.frete.toFixed(2) %>.
+      </p>
+
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0" style="font-size: 0.85rem;">
+          <tbody>
+            <tr>
+              <td>Base de venda (Preço Por)</td>
+              <td class="text-end fw-semibold">R$ <%= exemplo.base.toFixed(2) %></td>
+            </tr>
+            <tr class="text-danger">
+              <td>(−) Custo do produto</td>
+              <td class="text-end">− R$ <%= exemplo.custo.toFixed(2) %></td>
+            </tr>
+            <tr class="text-danger">
+              <td>(−) Comissão do Mercado Livre</td>
+              <td class="text-end">− R$ <%= exemplo.comissao.toFixed(2) %></td>
+            </tr>
+            <tr class="text-danger">
+              <td>(−) Frete</td>
+              <td class="text-end">− R$ <%= exemplo.frete.toFixed(2) %></td>
+            </tr>
+            <tr class="text-danger">
+              <td>
+                (−) Impostos sobre a venda
+                <small class="text-muted d-block">
+                  ICMS <%= rules.icms %>% (R$ <%= exemplo.icmsVal.toFixed(2) %>)
+                  · IPI <%= rules.ipi %>% (R$ <%= exemplo.ipiVal.toFixed(2) %>)
+                  · DIFAL <%= rules.difal %>% (R$ <%= exemplo.difalVal.toFixed(2) %>)
+                  · Custo Op. <%= rules.custoOperacional %>% (R$ <%= exemplo.custoOpVal.toFixed(2) %>)
+                </small>
+              </td>
+              <td class="text-end align-top">− R$ <%= exemplo.impostos.toFixed(2) %></td>
+            </tr>
+            <tr class="border-top">
+              <td class="fw-semibold">= Lucro Líquido</td>
+              <td class="text-end fw-bold <%= exemplo.lucro >= 0 ? 'text-success' : 'text-danger' %>">
+                R$ <%= exemplo.lucro.toFixed(2) %>
+              </td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">Margem</td>
+              <td class="text-end">
+                <span class="badge <%= exemplo.margem >= 0 ? 'text-bg-success' : 'text-bg-danger' %>">
+                  <%= exemplo.margem.toFixed(1) %>%
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <% if (exemplo.impostos === 0) { %>
+        <p class="text-muted small mt-3 mb-0">
+          <i class="bi bi-info-circle"></i>
+          Suas alíquotas estão zeradas, por isso os impostos ficaram em R$ 0,00 no exemplo.
+          Preencha os campos acima para vê-los no cálculo.
+        </p>
+      <% } %>
+    </div>
+  </div>
 </div>
 
 <%- include('partials/footer') %>
