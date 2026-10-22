@@ -12,7 +12,7 @@ import {
   showForgot,
   submitForgot,
 } from "../controllers/accountController.js";
-import { showItems, saveCusto } from "../controllers/itemsController.js";
+import { showItems } from "../controllers/itemsController.js";
 import { showDashboard } from "../controllers/dashboardController.js";
 import {
   showAuthPage,
@@ -63,7 +63,6 @@ router.post("/sync", startSync);
 router.post("/sync/selection", startSyncSelection);
 router.get("/sync/status", syncStatus);
 router.post("/settings/zip", saveZipCode);
-router.post("/items/custo", saveCusto);
 router.post("/produtos/custo", saveProductCost);
 router.post("/regras", saveRules);
 router.post("/simulador", runSimulator);

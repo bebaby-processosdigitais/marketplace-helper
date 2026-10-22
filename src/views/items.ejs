@@ -137,14 +137,8 @@
             </td>
             <td class="text-truncate" style="max-width: 320px;" title="<%= it.titulo %>"><%= it.titulo %></td>
             <td><small><%= it.sku || '-' %></small></td>
-            <td class="text-end" style="min-width: 110px;">
-              <div class="input-group input-group-sm custo-group">
-                <span class="input-group-text">R$</span>
-                <input type="text" inputmode="decimal" class="form-control custo-input text-end"
-                       data-mlb="<%= it.mlb %>"
-                       value="<%= it.custoProduto != null ? it.custoProduto.toFixed(2) : '' %>"
-                       placeholder="0,00" />
-              </div>
+            <td class="text-end">
+              <% if (it.custoProduto != null) { %>R$ <%= it.custoProduto.toFixed(2) %><% } else { %><span class="text-muted">-</span><% } %>
             </td>
             <td class="text-end">R$ <%= it.precoDe.toFixed(2) %></td>
             <td class="text-end"><%= it.precoPor ? 'R$ ' + it.precoPor.toFixed(2) : '-' %></td>

@@ -144,58 +144,6 @@
   }
 
   updateSelectionUI();
-
-  // ============ Custo manual -> recalcula lucro/margem ============
-  function fmtLucro(v) {
-    if (v == null) return '<span class="text-muted">-</span>';
-    const cls = v >= 0 ? "text-success" : "text-danger";
-    return '<strong class="' + cls + '">R$ ' + v.toFixed(2) + "</strong>";
-  }
-  function fmtMargem(v) {
-    if (v == null) return '<span class="text-muted">-</span>';
-    const cls = v >= 0 ? "text-bg-success" : "text-bg-danger";
-    return '<span class="badge ' + cls + '">' + v.toFixed(1) + "%</span>";
-  }
-
-  async function salvarCusto(input) {
-    const mlb = input.dataset.mlb;
-    input.classList.remove("is-invalid");
-    input.classList.add("saving");
-    try {
-      const res = await fetch("/items/custo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mlb, custo: input.value }),
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || "falha");
-
-      const lucroCell = document.querySelector('.cell-lucro[data-mlb="' + mlb + '"]');
-      const margemCell = document.querySelector('.cell-margem[data-mlb="' + mlb + '"]');
-      if (lucroCell) lucroCell.innerHTML = fmtLucro(data.lucro);
-      if (margemCell) margemCell.innerHTML = fmtMargem(data.margem);
-
-      // normaliza o valor exibido
-      input.value = data.custoProduto != null ? data.custoProduto.toFixed(2) : "";
-      input.classList.add("is-valid");
-      setTimeout(() => input.classList.remove("is-valid"), 1200);
-    } catch (e) {
-      input.classList.add("is-invalid");
-    } finally {
-      input.classList.remove("saving");
-    }
-  }
-
-  document.querySelectorAll(".custo-input").forEach(function (input) {
-    input.addEventListener("change", () => salvarCusto(input));
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        input.blur();
-      }
-    });
-  });
-
 })();
 
 // ============ Custo por SKU (página Produtos) -> aplica a todos ============
