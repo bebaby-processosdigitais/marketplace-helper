@@ -6,6 +6,8 @@ import {
   updateProfile,
   changePassword,
 } from "../services/accountService.js";
+import { getAuthStatus } from "../services/mlAuth.js";
+import { getMlProfile } from "../services/mlApi.js";
 
 export function showLogin(req, res) {
   if (req.session?.userId) return res.redirect("/");
@@ -32,12 +34,12 @@ export function showRegister(req, res) {
 }
 
 export async function register(req, res) {
-  const { email, storeName, password, confirmPassword } = req.body;
-  const values = { email, storeName };
+  const { email, storeName, whatsapp, password, confirmPassword } = req.body;
+  const values = { email, storeName, whatsapp };
   const fail = (error) =>
     res.status(400).render("register", { title: "Criar conta", error, values });
 
-  if (!email || !storeName || !password) return fail("Preencha todos os campos.");
+  if (!email || !storeName || !whatsapp || !password) return fail("Preencha todos os campos.");
   if (password !== confirmPassword) return fail("As senhas não conferem.");
 
   const pwError = validatePassword(password);
@@ -46,7 +48,7 @@ export async function register(req, res) {
   if (await findByEmail(email)) return fail("Esse e-mail já está cadastrado.");
 
   try {
-    const user = await createUser({ email, storeName, password });
+    const user = await createUser({ email, storeName, whatsapp, password });
     req.session.userId = user.id;
     res.redirect("/");
   } catch (e) {
@@ -60,25 +62,36 @@ export function logout(req, res) {
 }
 
 // ===== Minha conta =====
-export function showAccount(req, res) {
+export async function showAccount(req, res) {
+  const status = await getAuthStatus(req.user.id);
+  let mlProfile = null;
+  if (status.authenticated) {
+    try {
+      mlProfile = await getMlProfile(req.user.id);
+    } catch (_) {
+      mlProfile = null;
+    }
+  }
   res.render("account", {
     title: "Minha Conta",
     message: req.query.message || null,
     error: req.query.error || null,
+    authenticated: status.authenticated,
+    mlProfile,
   });
 }
 
 export async function updateAccountProfile(req, res) {
-  const { storeName, email } = req.body;
-  if (!storeName || !email) {
-    return res.redirect("/conta?error=" + encodeURIComponent("Preencha nome da loja e e-mail."));
+  const { storeName, email, whatsapp } = req.body;
+  if (!storeName || !email || !whatsapp) {
+    return res.redirect("/conta?error=" + encodeURIComponent("Preencha nome da loja, e-mail e WhatsApp."));
   }
   const existing = await findByEmail(email);
   if (existing && existing.id !== req.user.id) {
     return res.redirect("/conta?error=" + encodeURIComponent("Esse e-mail já está em uso por outra conta."));
   }
   try {
-    await updateProfile(req.user.id, { storeName, email });
+    await updateProfile(req.user.id, { storeName, email, whatsapp });
     res.redirect("/conta?message=" + encodeURIComponent("Dados atualizados com sucesso!"));
   } catch (e) {
     res.redirect("/conta?error=" + encodeURIComponent("Não foi possível salvar."));

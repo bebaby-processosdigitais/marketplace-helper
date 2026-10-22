@@ -44,6 +44,25 @@ export async function getMlUserId(userId) {
   return data.id;
 }
 
+// Dados do perfil ML (para a tela de conta): foto, nickname, reputacao, etc.
+export async function getMlProfile(userId) {
+  const data = await apiGet(userId, `${API}/users/me`);
+  if (!data) return null;
+  const rep = data.seller_reputation || {};
+  return {
+    id: data.id,
+    nickname: data.nickname || null,
+    photo: data.thumbnail?.picture_url || data.logo || null,
+    points: data.points ?? null,
+    permalink: data.permalink || null,
+    registrationDate: data.registration_date || null,
+    userType: data.user_type || null,
+    reputationLevel: rep.level_id || null,
+    salesCompleted: rep.metrics?.sales?.completed ?? null,
+    salesPeriod: rep.metrics?.sales?.period || null,
+  };
+}
+
 // Todos os MLBs do vendedor (paginacao scan)
 export async function getAllItemIds(userId, mlUserId, onProgress) {
   const ids = [];

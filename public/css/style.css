@@ -313,6 +313,73 @@ table a {
   background: var(--mh-primary);
 }
 
+/* ===== Chip de usuário na navbar ===== */
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--mh-border);
+  background: var(--mh-surface);
+  color: var(--mh-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.18s ease;
+}
+
+.user-chip:hover,
+.user-chip.active {
+  background: var(--mh-primary-soft);
+  border-color: var(--mh-primary);
+  color: var(--mh-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(31, 47, 86, 0.15);
+}
+
+.user-chip-icon {
+  color: var(--mh-primary);
+  font-size: 1.15rem;
+  animation: chipPulse 2.4s ease-in-out infinite;
+}
+
+.user-chip:hover .user-chip-icon {
+  animation: none;
+}
+
+.user-chip .chev {
+  opacity: 0.45;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.user-chip:hover .chev {
+  transform: translateX(2px);
+  opacity: 1;
+}
+
+@keyframes chipPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.16); }
+}
+
+/* Avatar da conta ML */
+.ml-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--mh-border);
+}
+
+.ml-avatar-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mh-primary-soft);
+  color: var(--mh-muted);
+  font-size: 1.6rem;
+}
+
 /* ===== Insights inteligentes ===== */
 .insight-item {
   transition: background 0.15s;

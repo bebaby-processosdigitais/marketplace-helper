@@ -48,8 +48,10 @@
           <% } %>
         <% } %>
         <% if (typeof user !== 'undefined' && user) { %>
-          <a href="/conta" class="navbar-text text-truncate text-decoration-none <%= typeof active !== 'undefined' && active === 'account' ? 'fw-semibold' : '' %>" style="max-width: 180px;" title="Minha conta">
-            <i class="bi bi-person-circle"></i> <%= user.storeName %>
+          <a href="/conta" class="user-chip <%= typeof active !== 'undefined' && active === 'account' ? 'active' : '' %>" title="Minha conta">
+            <i class="bi bi-person-circle user-chip-icon"></i>
+            <span class="text-truncate" style="max-width: 130px;"><%= user.storeName %></span>
+            <i class="bi bi-chevron-right chev small"></i>
           </a>
           <a href="/logout" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-box-arrow-right"></i> Sair

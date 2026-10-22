@@ -2,7 +2,7 @@
 <%- include('partials/head') %>
 <%- include('partials/nav') %>
 
-<div class="container py-4" style="max-width: 720px;">
+<div class="container py-4" style="max-width: 760px;">
   <h3 class="mb-3"><i class="bi bi-person-circle"></i> Minha Conta</h3>
 
   <% if (message) { %>
@@ -12,9 +12,62 @@
     <div class="alert alert-danger"><i class="bi bi-x-circle"></i> <%= error %></div>
   <% } %>
 
+  <!-- Conta Mercado Livre -->
+  <% if (mlProfile) { %>
+    <%
+      var rep = mlProfile.reputationLevel || '';
+      var repCor = rep.includes('green') ? 'success' : (rep.includes('yellow') || rep.includes('orange')) ? 'warning' : rep ? 'danger' : 'secondary';
+      var repNivel = rep ? rep.split('_')[0] : null;
+    %>
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-shop-window"></i> Conta Mercado Livre</div>
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <% if (mlProfile.photo) { %>
+            <img src="<%= mlProfile.photo %>" alt="Foto da conta" class="ml-avatar" />
+          <% } else { %>
+            <div class="ml-avatar ml-avatar-ph"><i class="bi bi-person"></i></div>
+          <% } %>
+          <div>
+            <div class="fs-5 fw-semibold"><%= mlProfile.nickname || '—' %></div>
+            <% if (mlProfile.permalink) { %>
+              <a href="<%= mlProfile.permalink %>" target="_blank" rel="noopener" class="small">
+                <i class="bi bi-box-arrow-up-right"></i> Ver perfil no Mercado Livre
+              </a>
+            <% } %>
+          </div>
+        </div>
+        <div class="row g-3 text-center">
+          <div class="col-6 col-md-3">
+            <div class="kpi-label">Reputação</div>
+            <% if (repNivel) { %>
+              <span class="badge text-bg-<%= repCor %>">Nível <%= repNivel %></span>
+            <% } else { %><span class="text-muted">—</span><% } %>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-label">Vendas <small>(<%= mlProfile.salesPeriod ? mlProfile.salesPeriod.replace('days', 'dias').replace('day', 'dia') : '—' %>)</small></div>
+            <div class="fw-semibold"><%= mlProfile.salesCompleted != null ? mlProfile.salesCompleted : '—' %></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-label">Pontos</div>
+            <div class="fw-semibold"><%= mlProfile.points != null ? mlProfile.points : '—' %></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-label">Membro desde</div>
+            <div class="fw-semibold"><%= mlProfile.registrationDate ? new Date(mlProfile.registrationDate).toLocaleDateString('pt-BR') : '—' %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } else if (!authenticated) { %>
+    <div class="alert alert-warning py-2">
+      <i class="bi bi-info-circle"></i> Conecte sua conta em <a href="/auth" class="alert-link">Autorização</a> para ver seus dados e foto do Mercado Livre aqui.
+    </div>
+  <% } %>
+
   <!-- Dados da conta -->
   <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white fw-semibold"><i class="bi bi-shop"></i> Dados da conta</div>
+    <div class="card-header bg-white fw-semibold"><i class="bi bi-person-vcard"></i> Dados da conta</div>
     <div class="card-body">
       <form action="/conta/perfil" method="post" class="row g-3">
         <div class="col-12 col-md-6">
@@ -24,6 +77,10 @@
         <div class="col-12 col-md-6">
           <label class="form-label">E-mail</label>
           <input type="email" name="email" class="form-control" value="<%= user.email %>" required />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label">WhatsApp</label>
+          <input type="tel" name="whatsapp" class="form-control" value="<%= user.whatsapp || '' %>" placeholder="(11) 99999-9999" required />
         </div>
         <div class="col-12">
           <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar dados</button>

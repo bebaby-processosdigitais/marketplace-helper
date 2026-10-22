@@ -10,12 +10,13 @@ export function validatePassword(pw) {
   return null;
 }
 
-export async function createUser({ email, storeName, password }) {
+export async function createUser({ email, storeName, whatsapp, password }) {
   const passwordHash = await bcrypt.hash(password, 10);
   return prisma.user.create({
     data: {
       email: email.toLowerCase().trim(),
       storeName: storeName.trim(),
+      whatsapp: (whatsapp || "").trim() || null,
       passwordHash,
     },
   });
@@ -35,10 +36,14 @@ export async function verifyPassword(user, password) {
   return bcrypt.compare(password, user.passwordHash);
 }
 
-export async function updateProfile(userId, { storeName, email }) {
+export async function updateProfile(userId, { storeName, email, whatsapp }) {
   return prisma.user.update({
     where: { id: userId },
-    data: { storeName: storeName.trim(), email: email.toLowerCase().trim() },
+    data: {
+      storeName: storeName.trim(),
+      email: email.toLowerCase().trim(),
+      whatsapp: (whatsapp || "").trim() || null,
+    },
   });
 }
 
