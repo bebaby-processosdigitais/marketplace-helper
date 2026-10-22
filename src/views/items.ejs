@@ -91,8 +91,8 @@
     </small>
   </div>
 
-  <!-- Tabela -->
-  <div class="table-responsive shadow-sm rounded">
+  <!-- Tabela (desktop) -->
+  <div class="table-responsive shadow-sm rounded d-none d-lg-block">
     <table class="table table-hover table-sm align-middle bg-white mb-0">
       <thead>
         <tr>
@@ -189,6 +189,70 @@
         <% }); %>
       </tbody>
     </table>
+  </div>
+
+  <!-- Cards (mobile / tablet) -->
+  <div class="d-lg-none">
+    <%
+      function msort(c, d) {
+        var u = "/?sort=" + c + "&dir=" + d;
+        if (search) u += "&search=" + encodeURIComponent(search);
+        return u;
+      }
+      function sel(c, d) { return sort === c && dir === d ? "selected" : ""; }
+    %>
+    <div class="mb-2">
+      <select class="form-select form-select-sm" onchange="if(this.value){window.location.href=this.value}">
+        <option value="/<%= search ? '?search=' + encodeURIComponent(search) : '' %>" <%= !sort ? 'selected' : '' %>>Ordenar: padrão</option>
+        <option value="<%= msort('margem','desc') %>" <%= sel('margem','desc') %>>Margem (maior)</option>
+        <option value="<%= msort('margem','asc') %>" <%= sel('margem','asc') %>>Margem (menor)</option>
+        <option value="<%= msort('lucro','desc') %>" <%= sel('lucro','desc') %>>Lucro (maior)</option>
+        <option value="<%= msort('precoDe','desc') %>" <%= sel('precoDe','desc') %>>Preço (maior)</option>
+        <option value="<%= msort('frete','desc') %>" <%= sel('frete','desc') %>>Frete (maior)</option>
+        <option value="<%= msort('vendas','desc') %>" <%= sel('vendas','desc') %>>Vendas (maior)</option>
+        <option value="<%= msort('visitas','desc') %>" <%= sel('visitas','desc') %>>Visitas (maior)</option>
+      </select>
+    </div>
+
+    <% if (items.length === 0) { %>
+      <div class="text-center text-muted py-4 bg-white rounded shadow-sm">
+        Nenhum anúncio. Clique em <strong>Atualizar tudo</strong>.
+      </div>
+    <% } %>
+
+    <% items.forEach(function(it) { %>
+      <div class="card shadow-sm mb-2">
+        <div class="card-body p-2">
+          <div class="d-flex gap-2">
+            <input class="form-check-input row-check mt-1" type="checkbox" value="<%= it.mlb %>" />
+            <% if (it.thumbnail) { %>
+              <img src="<%= it.thumbnail %>" class="item-card-img" alt="" loading="lazy" />
+            <% } %>
+            <div class="flex-grow-1" style="min-width: 0;">
+              <div class="fw-semibold item-card-title" title="<%= it.titulo %>"><%= it.titulo %></div>
+              <div class="small mb-1 text-muted">
+                <a href="<%= mlUrl(it) %>" target="_blank" rel="noopener" class="text-decoration-none"><%= it.mlb %></a>
+                · <span class="badge <%= it.status === 'active' ? 'text-bg-success' : 'text-bg-secondary' %>"><%= it.status || '-' %></span>
+                <% if (it.full) { %> · <i class="bi bi-check-circle-fill text-primary" title="Full"></i><% } %>
+                · <%= it.tipoAnuncio %>
+              </div>
+              <div class="row g-1 small">
+                <div class="col-4"><span class="mcard-lbl">Venda</span><strong>R$ <%= it._calc.base.toFixed(2) %></strong></div>
+                <div class="col-4"><span class="mcard-lbl">Lucro</span>
+                  <% if (it._calc.lucro != null) { %><strong class="<%= it._calc.lucro >= 0 ? 'text-success' : 'text-danger' %>">R$ <%= it._calc.lucro.toFixed(2) %></strong><% } else { %>-<% } %>
+                </div>
+                <div class="col-4"><span class="mcard-lbl">Margem</span>
+                  <% if (it._calc.margem != null) { %><span class="badge <%= it._calc.margem >= 0 ? 'text-bg-success' : 'text-bg-danger' %>"><%= it._calc.margem.toFixed(1) %>%</span><% } else { %>-<% } %>
+                </div>
+                <div class="col-4"><span class="mcard-lbl">Frete</span><%= it.frete != null ? 'R$ ' + it.frete.toFixed(2) : '-' %></div>
+                <div class="col-4"><span class="mcard-lbl">Comissão</span><%= it.comissao != null ? 'R$ ' + it.comissao.toFixed(2) : '-' %></div>
+                <div class="col-4"><span class="mcard-lbl">Custo</span><%= it.custoProduto != null ? 'R$ ' + it.custoProduto.toFixed(2) : '-' %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
   </div>
 
   <!-- Paginacao -->

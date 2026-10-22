@@ -101,7 +101,9 @@
 
   // ============ Selecao de linhas ============
   const checkAll = document.getElementById("checkAll");
-  const rowChecks = () => Array.from(document.querySelectorAll(".row-check"));
+  // Só conta checkboxes visíveis (tabela no desktop OU cards no mobile).
+  const rowChecks = () =>
+    Array.from(document.querySelectorAll(".row-check")).filter((c) => c.offsetParent !== null);
 
   function selectedMlbs() {
     return rowChecks().filter((c) => c.checked).map((c) => c.value);
