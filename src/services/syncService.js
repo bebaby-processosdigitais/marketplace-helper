@@ -153,6 +153,11 @@ async function doSync(userId, selection) {
   state.phase = "concluido";
   state.running = false;
   state.finishedAt = new Date();
+
+  // Registra a última sincronização (para exibir na navbar)
+  await prisma.settings
+    .update({ where: { userId }, data: { lastSyncAt: state.finishedAt } })
+    .catch(() => {});
 }
 
 async function upsertItem(userId, data, zip, state) {

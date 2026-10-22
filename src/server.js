@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "./config/env.js";
 import routes from "./routes/index.js";
+import { startScheduler } from "./scheduler.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -51,5 +52,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(config.port, () => {
-  console.log(`\n  Marketplace Helper rodando em http://localhost:${config.port}\n`);
+  console.log(`\n  Marketplace Helper rodando em http://localhost:${config.port}`);
+  startScheduler();
+  console.log("");
 });

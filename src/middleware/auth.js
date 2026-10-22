@@ -1,4 +1,5 @@
 import { getUserById } from "../services/accountService.js";
+import prisma from "../config/prisma.js";
 
 // Exige login. Carrega o usuario em req.user e res.locals.user (para as views).
 export async function requireAuth(req, res, next) {
@@ -12,5 +13,13 @@ export async function requireAuth(req, res, next) {
   }
   req.user = user;
   res.locals.user = user;
+
+  // Última sincronização (para a navbar)
+  const s = await prisma.settings.findUnique({
+    where: { userId: user.id },
+    select: { lastSyncAt: true },
+  });
+  res.locals.lastSyncAt = s?.lastSyncAt || null;
+
   next();
 }
