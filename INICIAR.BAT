@@ -10,17 +10,23 @@ echo.
 
 REM --- Instala dependencias na primeira vez ---
 if not exist "node_modules\" (
-    echo [1/3] Instalando dependencias ^(primeira vez^)...
+    echo [1/4] Instalando dependencias ^(primeira vez^)...
     call npm install
-    echo [2/3] Preparando banco de dados...
-    call npx prisma generate
-    call npx prisma migrate deploy
 ) else (
-    echo [OK] Dependencias ja instaladas.
+    echo [1/4] Dependencias ja instaladas.
 )
 
-echo.
-echo [3/3] Iniciando servidor na porta 3333...
+REM --- Garante client Prisma e banco atualizados (sempre) ---
+echo [2/4] Atualizando banco de dados...
+call npx prisma generate >nul 2>&1
+call npx prisma migrate deploy >nul 2>&1
+
+REM --- Libera a porta 3333 (encerra servidor antigo preso, se houver) ---
+echo [3/4] Liberando a porta 3333...
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3333" ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>&1
+
+REM --- Inicia o servidor ---
+echo [4/4] Iniciando servidor na porta 3333...
 start "Servidor ML" cmd /k "npm start"
 
 REM --- Espera o servidor subir ---
