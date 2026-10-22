@@ -23,6 +23,7 @@ import {
 } from "../controllers/syncController.js";
 import { exportExcel } from "../controllers/exportController.js";
 import { showRules, saveRules } from "../controllers/rulesController.js";
+import { showSimulator, runSimulator } from "../controllers/simulatorController.js";
 
 const router = Router();
 
@@ -40,6 +41,7 @@ router.use(requireAuth);
 router.get("/", showItems);
 router.get("/dashboard", showDashboard);
 router.get("/regras", showRules);
+router.get("/simulador", showSimulator);
 router.get("/auth", showAuthPage);
 router.get("/callback", oauthCallback);
 
@@ -51,6 +53,7 @@ router.get("/sync/status", syncStatus);
 router.post("/settings/zip", saveZipCode);
 router.post("/items/custo", saveCusto);
 router.post("/regras", saveRules);
+router.post("/simulador", runSimulator);
 router.get("/export", exportExcel);
 
 export default router;

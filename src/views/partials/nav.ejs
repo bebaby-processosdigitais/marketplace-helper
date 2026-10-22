@@ -24,6 +24,11 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link <%= typeof active !== 'undefined' && active === 'simulator' ? 'active' : '' %>" href="/simulador">
+            <i class="bi bi-calculator"></i> Simulador
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link <%= typeof active !== 'undefined' && active === 'auth' ? 'active' : '' %>" href="/auth">
             <i class="bi bi-shield-lock"></i> Autorização
           </a>

@@ -1,0 +1,138 @@
+<% var active = 'simulator'; %>
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+
+<div class="container py-4" style="max-width: 900px;">
+  <h3 class="mb-1"><i class="bi bi-calculator"></i> Simulador de Anúncio</h3>
+  <p class="text-muted mb-4">
+    Simule um cadastro e veja quanto renderia no <strong>Clássico</strong> e no <strong>Premium</strong>,
+    antes de anunciar.
+  </p>
+
+  <% if (error) { %>
+    <div class="alert alert-danger"><i class="bi bi-x-circle"></i> <%= error %></div>
+  <% } %>
+
+  <!-- Formulário -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form action="/simulador" method="post" class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Título do produto</label>
+          <input type="text" name="title" class="form-control" value="<%= values.title || '' %>"
+                 placeholder="Ex: Carrinho de bebê passeio reclinável" required />
+          <small class="text-muted">Usamos o título para descobrir a categoria (comissão) e estimar o frete.</small>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Preço de venda</label>
+          <div class="input-group">
+            <span class="input-group-text">R$</span>
+            <input type="text" inputmode="decimal" name="preco" class="form-control" value="<%= values.preco || '' %>" placeholder="0,00" required />
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Custo do produto</label>
+          <div class="input-group">
+            <span class="input-group-text">R$</span>
+            <input type="text" inputmode="decimal" name="custo" class="form-control" value="<%= values.custo || '' %>" placeholder="0,00" />
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Frete <small class="text-muted">(opcional)</small></label>
+          <div class="input-group">
+            <span class="input-group-text">R$</span>
+            <input type="text" inputmode="decimal" name="freteManual" class="form-control" value="<%= values.freteManual || '' %>" placeholder="auto" />
+          </div>
+          <small class="text-muted">Deixe vazio para estimar pelos seus anúncios.</small>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary"><i class="bi bi-play-fill"></i> Simular</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <% if (resultado) { %>
+    <!-- Contexto da simulação -->
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <% if (resultado.categoria) { %>
+        <span class="badge text-bg-primary"><i class="bi bi-tag"></i> Categoria: <%= resultado.categoria.categoryName %></span>
+      <% } else { %>
+        <span class="badge text-bg-secondary">Categoria não identificada</span>
+      <% } %>
+      <%
+        var fb = resultado.freteInfo;
+        var freteFonte = fb.base === 'manual' ? 'informado por você'
+          : fb.base === 'categoria' ? ('média de ' + fb.amostra + ' anúncio(s) seus da categoria')
+          : fb.base === 'titulo' ? ('média de ' + fb.amostra + ' anúncio(s) seus com título parecido')
+          : fb.base === 'tabela' ? 'tabela fixa do ML (item barato)'
+          : 'não estimado';
+      %>
+      <span class="badge text-bg-secondary">
+        <i class="bi bi-truck"></i> Frete: <%= fb.valor != null ? 'R$ ' + fb.valor.toFixed(2) : '—' %>
+        <span class="opacity-75">(<%= freteFonte %>)</span>
+      </span>
+    </div>
+    <% if (resultado.freteInfo.valor == null) { %>
+      <div class="alert alert-warning py-2">
+        <i class="bi bi-exclamation-triangle"></i>
+        Não consegui estimar o frete (você ainda não tem anúncios parecidos sincronizados).
+        Informe o frete manualmente no formulário para um resultado preciso.
+      </div>
+    <% } %>
+
+    <!-- Comparação Clássico x Premium -->
+    <div class="row g-3">
+      <%
+        function bloco(nome, d, destaque) {
+      %>
+        <div class="col-12 col-md-6">
+          <div class="card shadow-sm h-100 <%= destaque ? 'border-success' : '' %>">
+            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+              <span><%= nome %></span>
+              <% if (destaque) { %><span class="badge text-bg-success">Melhor retorno</span><% } %>
+            </div>
+            <div class="card-body">
+              <table class="table table-sm mb-0">
+                <tbody>
+                  <tr><td>Preço de venda</td><td class="text-end fw-semibold">R$ <%= resultado.input.preco.toFixed(2) %></td></tr>
+                  <tr class="text-danger"><td>(−) Custo do produto</td><td class="text-end">− R$ <%= resultado.input.custo.toFixed(2) %></td></tr>
+                  <tr class="text-danger">
+                    <td>(−) Comissão <% if (d.comissaoPct != null) { %><small class="text-muted">(<%= d.comissaoPct %>%)</small><% } %></td>
+                    <td class="text-end">− R$ <%= d.comissao.toFixed(2) %></td>
+                  </tr>
+                  <tr class="text-danger"><td>(−) Frete</td><td class="text-end">− R$ <%= d.frete.toFixed(2) %></td></tr>
+                  <tr class="text-danger"><td>(−) Impostos</td><td class="text-end">− R$ <%= d.impostos.toFixed(2) %></td></tr>
+                  <tr class="border-top">
+                    <td class="fw-semibold">= Lucro líquido</td>
+                    <td class="text-end fw-bold <%= d.lucro >= 0 ? 'text-success' : 'text-danger' %>">R$ <%= d.lucro.toFixed(2) %></td>
+                  </tr>
+                  <tr>
+                    <td class="fw-semibold">Margem</td>
+                    <td class="text-end">
+                      <% if (d.margem != null) { %>
+                        <span class="badge <%= d.margem >= 0 ? 'text-bg-success' : 'text-bg-danger' %>"><%= d.margem.toFixed(1) %>%</span>
+                      <% } else { %>—<% } %>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      <% }
+        var melhorPremium = resultado.premium.lucro > resultado.classico.lucro;
+        bloco('Clássico', resultado.classico, !melhorPremium);
+        bloco('Premium', resultado.premium, melhorPremium);
+      %>
+    </div>
+
+    <p class="text-muted small mt-3">
+      <i class="bi bi-info-circle"></i>
+      Impostos aplicados conforme a tela <a href="/regras">Regras</a>
+      (ICMS <%= resultado.rules.icms %>% + IPI <%= resultado.rules.ipi %>% + DIFAL <%= resultado.rules.difal %>% + Custo Op. <%= resultado.rules.custoOperacional %>%).
+    </p>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
