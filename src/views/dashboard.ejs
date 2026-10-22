@@ -3,33 +3,84 @@
 <%- include('partials/nav') %>
 
 <div class="container-fluid py-3 px-md-4">
-  <h3 class="mb-3"><i class="bi bi-speedometer2"></i> Dashboard de Fretes</h3>
+  <h3 class="mb-3"><i class="bi bi-speedometer2"></i> Dashboard</h3>
 
-  <!-- Cards resumo -->
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3">
+  <!-- KPIs de rentabilidade e saúde -->
+  <div class="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-3 mb-4">
+    <div class="col">
       <div class="card kpi shadow-sm h-100"><div class="card-body">
-        <div class="kpi-label">Anúncios</div>
-        <div class="kpi-value"><%= total %></div>
+        <div class="kpi-label">Margem média</div>
+        <div class="kpi-value"><%= margemMedia != null ? margemMedia.toFixed(1) + '%' : '—' %></div>
+        <small class="text-muted">dos itens com custo</small>
       </div></div>
     </div>
-    <div class="col-6 col-lg-3">
+    <div class="col">
       <div class="card kpi shadow-sm h-100"><div class="card-body">
-        <div class="kpi-label">Frete médio</div>
-        <div class="kpi-value">R$ <%= freteMedio.toFixed(2) %></div>
+        <div class="kpi-label">No prejuízo</div>
+        <div class="kpi-value <%= prejuizo > 0 ? 'text-danger' : '' %>"><%= prejuizo %></div>
+        <small class="text-muted">margem negativa</small>
       </div></div>
     </div>
-    <div class="col-6 col-lg-3">
+    <div class="col">
       <div class="card kpi shadow-sm h-100"><div class="card-body">
-        <div class="kpi-label">Frete mais caro</div>
-        <div class="kpi-value">R$ <%= freteMax.toFixed(2) %></div>
+        <div class="kpi-label">Saudáveis</div>
+        <div class="kpi-value text-success"><%= pctSaudaveis.toFixed(0) %>%</div>
+        <small class="text-muted">do catálogo</small>
       </div></div>
     </div>
-    <div class="col-6 col-lg-3">
+    <div class="col">
       <div class="card kpi shadow-sm h-100"><div class="card-body">
-        <div class="kpi-label">Anúncios FULL</div>
-        <div class="kpi-value"><%= full %></div>
+        <div class="kpi-label">Cobertura de custo</div>
+        <div class="kpi-value"><%= coberturaCusto.toFixed(0) %>%</div>
+        <small class="text-muted">com custo preenchido</small>
       </div></div>
+    </div>
+    <div class="col">
+      <div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="kpi-label">Ticket médio</div>
+        <div class="kpi-value">R$ <%= ticketMedio.toFixed(2) %></div>
+        <small class="text-muted">preço de venda</small>
+      </div></div>
+    </div>
+    <div class="col">
+      <div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="kpi-label">Sem estoque</div>
+        <div class="kpi-value <%= semEstoqueAtivos > 0 ? 'text-danger' : '' %>"><%= semEstoqueAtivos %></div>
+        <small class="text-muted">ativos</small>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Insights inteligentes -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold">
+      <i class="bi bi-lightbulb text-warning"></i> Insights inteligentes
+    </div>
+    <div class="card-body">
+      <% if (insights && insights.length) { %>
+        <div class="row g-3">
+          <% insights.forEach(function(ins) { %>
+            <div class="col-12 col-lg-6">
+              <a href="<%= ins.link %>" class="text-decoration-none">
+                <div class="d-flex gap-3 p-2 rounded insight-item">
+                  <div class="insight-icon text-bg-<%= ins.color %>">
+                    <i class="bi bi-<%= ins.icon %>"></i>
+                  </div>
+                  <div>
+                    <div class="fw-semibold text-dark"><%= ins.titulo %></div>
+                    <div class="text-muted small"><%= ins.texto %></div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="text-center text-muted py-3">
+          <i class="bi bi-check-circle text-success fs-4 d-block mb-2"></i>
+          Tudo certo por aqui! Nenhum ponto de atenção no momento.
+        </div>
+      <% } %>
     </div>
   </div>
 
