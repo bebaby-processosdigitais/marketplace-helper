@@ -153,10 +153,11 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--mh-text);
   border-color: var(--mh-border);
   margin-bottom: 0;
+  font-size: 0.8rem;
 }
 
 .table > :not(caption) > * > * {
-  padding: 0.6rem 0.75rem;
+  padding: 0.4rem 0.55rem;
 }
 
 .table thead th {
@@ -173,6 +174,7 @@ h1, h2, h3, h4, h5, h6 {
 .table tbody td {
   border-top: 1px solid var(--mh-border);
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 .table-hover > tbody > tr:hover > * {
