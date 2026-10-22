@@ -31,3 +31,24 @@ export function computeProfit(item, rules) {
 export function attachProfit(items, rules) {
   return items.map((it) => ({ ...it, _calc: computeProfit(it, rules) }));
 }
+
+// Avalia a "saúde" do anúncio a partir de status, estoque, custo e margem.
+// Retorna { label, color (sufixo bootstrap), icon }.
+export function computeHealth(item, calc) {
+  if (item.status && item.status !== "active") {
+    return { label: "Inativo", color: "secondary", icon: "pause-circle" };
+  }
+  if ((item.estoque || 0) <= 0) {
+    return { label: "Sem estoque", color: "danger", icon: "exclamation-triangle" };
+  }
+  if (item.custoProduto == null) {
+    return { label: "Preencher custo", color: "secondary", icon: "tag" };
+  }
+  if (calc.margem != null && calc.margem < 0) {
+    return { label: "Prejuízo", color: "danger", icon: "graph-down-arrow" };
+  }
+  if (calc.margem != null && calc.margem < 10) {
+    return { label: "Margem baixa", color: "warning", icon: "exclamation-circle" };
+  }
+  return { label: "Saudável", color: "success", icon: "check-circle" };
+}

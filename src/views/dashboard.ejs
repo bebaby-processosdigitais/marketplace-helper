@@ -33,6 +33,52 @@
     </div>
   </div>
 
+  <!-- Últimos anúncios cadastrados -->
+  <% if (ultimosAnuncios && ultimosAnuncios.length) { %>
+    <h5 class="mb-3"><i class="bi bi-clock-history"></i> Últimos anúncios cadastrados</h5>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
+      <% ultimosAnuncios.forEach(function(it) { %>
+        <div class="col">
+          <div class="card h-100 shadow-sm overflow-hidden">
+            <a href="https://www.mercadolivre.com.br/anuncio/<%= it.mlb %>" target="_blank" class="ultimo-img">
+              <% if (it.thumbnail) { %>
+                <img src="<%= it.thumbnail %>" alt="<%= it.titulo %>" loading="lazy" />
+              <% } else { %>
+                <div class="ultimo-img-placeholder"><i class="bi bi-image"></i></div>
+              <% } %>
+            </a>
+            <div class="card-body p-2 d-flex flex-column">
+              <div class="small fw-semibold ultimo-titulo mb-1" title="<%= it.titulo %>"><%= it.titulo %></div>
+              <div class="text-muted" style="font-size: 0.72rem;"><%= it.mlb %></div>
+
+              <div class="mt-2 d-flex justify-content-between align-items-baseline">
+                <span class="text-muted" style="font-size: 0.72rem;">Venda</span>
+                <span class="fw-semibold">R$ <%= it._calc.base.toFixed(2) %></span>
+              </div>
+              <div class="d-flex justify-content-between align-items-baseline">
+                <span class="text-muted" style="font-size: 0.72rem;">Lucro</span>
+                <% if (it._calc.lucro != null) { %>
+                  <span class="fw-semibold <%= it._calc.lucro >= 0 ? 'text-success' : 'text-danger' %>">R$ <%= it._calc.lucro.toFixed(2) %></span>
+                <% } else { %><span class="text-muted">-</span><% } %>
+              </div>
+
+              <div class="mt-2 d-flex justify-content-between align-items-center">
+                <% if (it._calc.margem != null) { %>
+                  <span class="badge <%= it._calc.margem >= 0 ? 'text-bg-success' : 'text-bg-danger' %>">
+                    <%= it._calc.margem.toFixed(1) %>%
+                  </span>
+                <% } else { %><span></span><% } %>
+                <span class="badge text-bg-<%= it._health.color %>" title="Saúde do anúncio">
+                  <i class="bi bi-<%= it._health.icon %>"></i> <%= it._health.label %>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+
   <div class="row g-3">
     <!-- Fretes mais caros -->
     <div class="col-lg-6">

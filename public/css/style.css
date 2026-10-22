@@ -313,6 +313,38 @@ table a {
   background: var(--mh-primary);
 }
 
+/* ===== Cards de últimos anúncios ===== */
+.ultimo-img {
+  display: block;
+  height: 150px;
+  background: var(--mh-primary-soft);
+}
+
+.ultimo-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+}
+
+.ultimo-img-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--mh-muted);
+  font-size: 2rem;
+}
+
+.ultimo-titulo {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.25;
+  min-height: 2.4em;
+}
+
 /* ===== Login / Cadastro ===== */
 .auth-wrap {
   min-height: 100vh;

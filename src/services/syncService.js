@@ -197,6 +197,13 @@ async function upsertItem(userId, data, zip, visitsMap, state) {
   const comissao = fee ? fee.amount : existing?.comissao ?? null;
   const comissaoPct = fee ? fee.pct : existing?.comissaoPct ?? null;
 
+  // Imagem de capa (prefere a foto em alta; cai pro thumbnail seguro)
+  const thumbnail =
+    data.pictures?.[0]?.secure_url ||
+    data.secure_thumbnail ||
+    data.thumbnail ||
+    null;
+
   const payload = {
     proprio: true,
     variacaoIds,
@@ -204,6 +211,7 @@ async function upsertItem(userId, data, zip, visitsMap, state) {
     variacaoSkus,
     marca,
     titulo: data.title || "",
+    thumbnail,
     precoDe,
     precoPor,
     frete,

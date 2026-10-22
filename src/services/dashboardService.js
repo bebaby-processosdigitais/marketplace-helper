@@ -1,7 +1,22 @@
 import prisma from "../config/prisma.js";
+import { getBusinessRules } from "./rulesService.js";
+import { computeProfit, computeHealth } from "./calcService.js";
 
 // Dados do dashboard, escopados ao usuario
 export async function getDashboardData(userId) {
+  const rules = await getBusinessRules(userId);
+
+  // Últimos 5 anúncios cadastrados (com cálculo e saúde)
+  const ultimosRaw = await prisma.item.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+  });
+  const ultimosAnuncios = ultimosRaw.map((it) => {
+    const calc = computeProfit(it, rules);
+    return { ...it, _calc: calc, _health: computeHealth(it, calc) };
+  });
+
   const total = await prisma.item.count({ where: { userId } });
   const comFrete = await prisma.item.count({ where: { userId, frete: { not: null } } });
 
@@ -49,6 +64,7 @@ export async function getDashboardData(userId) {
   }
 
   return {
+    ultimosAnuncios,
     total,
     comFrete,
     full,
