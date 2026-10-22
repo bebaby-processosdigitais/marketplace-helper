@@ -14,6 +14,12 @@
     if (sort !== col) return '<span class="sort-ico">↕</span>';
     return dir === 'asc' ? '<span class="sort-ico active">▲</span>' : '<span class="sort-ico active">▼</span>';
   }
+  // Link oficial do anuncio: usa o permalink salvo; senao, fallback por MLB
+  function mlUrl(it) {
+    if (it.permalink) return it.permalink;
+    var digits = String(it.mlb).replace(/\D/g, '');
+    return 'https://produto.mercadolivre.com.br/MLB-' + digits;
+  }
 %>
 
 <div class="container-fluid py-3 px-md-4">
@@ -125,7 +131,7 @@
               <input class="form-check-input row-check" type="checkbox" value="<%= it.mlb %>" />
             </td>
             <td>
-              <a href="https://www.mercadolivre.com.br/anuncio/<%= it.mlb %>" target="_blank" class="text-decoration-none">
+              <a href="<%= mlUrl(it) %>" target="_blank" rel="noopener" class="text-decoration-none">
                 <%= it.mlb %>
               </a>
             </td>

@@ -211,6 +211,7 @@ async function upsertItem(userId, data, zip, state) {
     marca,
     titulo: data.title || "",
     thumbnail,
+    permalink: data.permalink || null,
     precoDe,
     precoPor,
     frete,

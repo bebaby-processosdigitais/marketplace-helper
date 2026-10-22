@@ -34,13 +34,20 @@
   </div>
 
   <!-- Últimos anúncios cadastrados -->
+  <%
+    function mlUrl(it) {
+      if (it.permalink) return it.permalink;
+      var digits = String(it.mlb).replace(/\D/g, '');
+      return 'https://produto.mercadolivre.com.br/MLB-' + digits;
+    }
+  %>
   <% if (ultimosAnuncios && ultimosAnuncios.length) { %>
     <h5 class="mb-3"><i class="bi bi-clock-history"></i> Últimos anúncios cadastrados</h5>
     <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
       <% ultimosAnuncios.forEach(function(it) { %>
         <div class="col">
           <div class="card h-100 shadow-sm overflow-hidden">
-            <a href="https://www.mercadolivre.com.br/anuncio/<%= it.mlb %>" target="_blank" class="ultimo-img">
+            <a href="<%= mlUrl(it) %>" target="_blank" rel="noopener" class="ultimo-img">
               <% if (it.thumbnail) { %>
                 <img src="<%= it.thumbnail %>" alt="<%= it.titulo %>" loading="lazy" />
               <% } else { %>

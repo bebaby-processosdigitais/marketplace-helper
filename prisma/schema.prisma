@@ -73,6 +73,7 @@ model Item {
   marca         String?
   titulo        String   @default("")
   thumbnail     String?
+  permalink     String?
   custoProduto  Float?
   precoDe       Float    @default(0)
   precoPor      Float    @default(0)
