@@ -1,4 +1,5 @@
 import prisma from "../config/prisma.js";
+import { encrypt, decrypt } from "../config/crypto.js";
 
 const OAUTH_URL = "https://api.mercadolibre.com/oauth/token";
 
@@ -18,7 +19,7 @@ export async function saveCredentials(userId, { appId, appSecret, redirectUri })
     redirectUri: (redirectUri || "").trim(),
   };
   const secret = (appSecret || "").trim();
-  if (secret) data.appSecret = secret;
+  if (secret) data.appSecret = encrypt(secret);
   return prisma.mlAccount.update({ where: { userId }, data });
 }
 
@@ -43,7 +44,7 @@ export async function exchangeCodeForTokens(userId, code) {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     client_id: acc.appId,
-    client_secret: acc.appSecret,
+    client_secret: decrypt(acc.appSecret),
     code,
     redirect_uri: acc.redirectUri,
   });
@@ -69,8 +70,8 @@ export async function refreshAccessToken(userId) {
   const body = new URLSearchParams({
     grant_type: "refresh_token",
     client_id: acc.appId,
-    client_secret: acc.appSecret,
-    refresh_token: acc.refreshToken,
+    client_secret: decrypt(acc.appSecret),
+    refresh_token: decrypt(acc.refreshToken),
   });
 
   const res = await fetch(OAUTH_URL, {
@@ -89,8 +90,8 @@ async function saveTokens(userId, data) {
   return prisma.mlAccount.update({
     where: { userId },
     data: {
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token,
+      accessToken: encrypt(data.access_token),
+      refreshToken: encrypt(data.refresh_token),
       mlUserId: data.user_id ? String(data.user_id) : undefined,
       expiresIn: data.expires_in || 21600,
       savedAt: new Date(),
@@ -114,7 +115,7 @@ export async function getValidToken(userId) {
   if (isExpired(acc)) {
     acc = await refreshAccessToken(userId);
   }
-  return acc.accessToken;
+  return decrypt(acc.accessToken);
 }
 
 // Status para a UI
