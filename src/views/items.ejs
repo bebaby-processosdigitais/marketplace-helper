@@ -96,12 +96,15 @@
           <th><a class="sort-link" href="<%= sortUrl('mlb') %>">MLB <%- arrow('mlb') %></a></th>
           <th><a class="sort-link" href="<%= sortUrl('titulo') %>">Título <%- arrow('titulo') %></a></th>
           <th><a class="sort-link" href="<%= sortUrl('sku') %>">SKU <%- arrow('sku') %></a></th>
+          <th class="text-end"><a class="sort-link" href="<%= sortUrl('custoProduto') %>">Custo <%- arrow('custoProduto') %></a></th>
           <th class="text-end"><a class="sort-link" href="<%= sortUrl('precoDe') %>">Preço De <%- arrow('precoDe') %></a></th>
           <th class="text-end"><a class="sort-link" href="<%= sortUrl('precoPor') %>">Preço Por <%- arrow('precoPor') %></a></th>
           <th class="text-end"><a class="sort-link" href="<%= sortUrl('frete') %>">Frete <%- arrow('frete') %></a></th>
           <th class="text-center">Frete Δ</th>
           <th class="text-end"><a class="sort-link" href="<%= sortUrl('comissao') %>">Comissão <%- arrow('comissao') %></a></th>
-          <th class="text-end">Custo ML</th>
+          <th class="text-end"><a class="sort-link" href="<%= sortUrl('custoML') %>">Custo ML <%- arrow('custoML') %></a></th>
+          <th class="text-end"><a class="sort-link" href="<%= sortUrl('lucro') %>">Lucro Líq. <%- arrow('lucro') %></a></th>
+          <th class="text-end"><a class="sort-link" href="<%= sortUrl('margem') %>">Margem <%- arrow('margem') %></a></th>
           <th class="text-center"><a class="sort-link" href="<%= sortUrl('tipo') %>">Tipo <%- arrow('tipo') %></a></th>
           <th class="text-end"><a class="sort-link" href="<%= sortUrl('visitas') %>">Visitas <%- arrow('visitas') %></a></th>
           <th class="text-end"><a class="sort-link" href="<%= sortUrl('vendas') %>">Vendas <%- arrow('vendas') %></a></th>
@@ -112,7 +115,7 @@
       </thead>
       <tbody>
         <% if (items.length === 0) { %>
-          <tr><td colspan="16" class="text-center text-muted py-4">
+          <tr><td colspan="19" class="text-center text-muted py-4">
             Nenhum anúncio. Clique em <strong>Atualizar tudo</strong> para sincronizar com o Mercado Livre.
           </td></tr>
         <% } %>
@@ -128,6 +131,15 @@
             </td>
             <td class="text-truncate" style="max-width: 320px;" title="<%= it.titulo %>"><%= it.titulo %></td>
             <td><small><%= it.sku || '-' %></small></td>
+            <td class="text-end" style="min-width: 110px;">
+              <div class="input-group input-group-sm custo-group">
+                <span class="input-group-text">R$</span>
+                <input type="text" inputmode="decimal" class="form-control custo-input text-end"
+                       data-mlb="<%= it.mlb %>"
+                       value="<%= it.custoProduto != null ? it.custoProduto.toFixed(2) : '' %>"
+                       placeholder="0,00" />
+              </div>
+            </td>
             <td class="text-end">R$ <%= it.precoDe.toFixed(2) %></td>
             <td class="text-end"><%= it.precoPor ? 'R$ ' + it.precoPor.toFixed(2) : '-' %></td>
             <td class="text-end"><%= it.frete != null ? 'R$ ' + it.frete.toFixed(2) : '-' %></td>
@@ -149,9 +161,19 @@
               <% } else { %>-<% } %>
             </td>
             <td class="text-end">
-              <% if (it.comissao != null) { var custo = it.comissao + (it.frete || 0); %>
-                <strong class="text-danger">R$ <%= custo.toFixed(2) %></strong>
+              <% if (it.comissao != null) { %>
+                <strong class="text-danger">R$ <%= it._calc.custoML.toFixed(2) %></strong>
               <% } else { %>-<% } %>
+            </td>
+            <td class="text-end cell-lucro" data-mlb="<%= it.mlb %>">
+              <% if (it._calc.lucro != null) { %>
+                <strong class="<%= it._calc.lucro >= 0 ? 'text-success' : 'text-danger' %>">R$ <%= it._calc.lucro.toFixed(2) %></strong>
+              <% } else { %><span class="text-muted">-</span><% } %>
+            </td>
+            <td class="text-end cell-margem" data-mlb="<%= it.mlb %>">
+              <% if (it._calc.margem != null) { %>
+                <span class="badge <%= it._calc.margem >= 0 ? 'text-bg-success' : 'text-bg-danger' %>"><%= it._calc.margem.toFixed(1) %>%</span>
+              <% } else { %><span class="text-muted">-</span><% } %>
             </td>
             <td class="text-center"><small><%= it.tipoAnuncio %></small></td>
             <td class="text-end"><%= it.visitas %></td>

@@ -1,6 +1,8 @@
 import ExcelJS from "exceljs";
 import prisma from "../config/prisma.js";
 import { buildItemWhere } from "./itemService.js";
+import { getBusinessRules } from "./rulesService.js";
+import { computeProfit } from "./calcService.js";
 
 // Gera um workbook Excel com os itens do usuario (respeita o filtro de busca)
 export async function buildItemsWorkbook(userId, search) {
@@ -8,6 +10,7 @@ export async function buildItemsWorkbook(userId, search) {
     where: buildItemWhere(userId, search),
     orderBy: { updatedAt: "desc" },
   });
+  const rules = await getBusinessRules(userId);
 
   const wb = new ExcelJS.Workbook();
   wb.creator = "Marketplace Helper";
@@ -20,6 +23,7 @@ export async function buildItemsWorkbook(userId, search) {
     { header: "SKU", key: "sku", width: 18 },
     { header: "TITULO", key: "titulo", width: 50 },
     { header: "MARCA", key: "marca", width: 18 },
+    { header: "CUSTO PRODUTO", key: "custoProduto", width: 14 },
     { header: "PRECO DE", key: "precoDe", width: 12 },
     { header: "PRECO POR", key: "precoPor", width: 12 },
     { header: "FRETE", key: "frete", width: 10 },
@@ -28,6 +32,9 @@ export async function buildItemsWorkbook(userId, search) {
     { header: "COMISSAO", key: "comissao", width: 10 },
     { header: "COMISSAO %", key: "comissaoPct", width: 11 },
     { header: "CUSTO ML", key: "custoML", width: 10 },
+    { header: "IMPOSTOS", key: "impostos", width: 10 },
+    { header: "LUCRO LIQUIDO", key: "lucro", width: 14 },
+    { header: "MARGEM %", key: "margem", width: 10 },
     { header: "STATUS", key: "status", width: 12 },
     { header: "TIPO", key: "tipoAnuncio", width: 12 },
     { header: "VISITAS", key: "visitas", width: 10 },
@@ -52,17 +59,20 @@ export async function buildItemsWorkbook(userId, search) {
   };
 
   for (const it of items) {
-    const custoML = it.comissao != null ? it.comissao + (it.frete || 0) : null;
+    const calc = computeProfit(it, rules);
     ws.addRow({
       ...it,
-      custoML,
+      custoML: calc.custoML,
+      impostos: calc.impostos != null ? Number(calc.impostos.toFixed(2)) : null,
+      lucro: calc.lucro != null ? Number(calc.lucro.toFixed(2)) : null,
+      margem: calc.margem != null ? Number(calc.margem.toFixed(1)) : null,
       full: it.full ? "SIM" : "NAO",
       catalogo: it.catalogo ? "SIM" : "NAO",
       freteMudou: it.freteMudou ? "SIM" : "NAO",
     });
   }
 
-  ws.autoFilter = { from: "A1", to: "Z1" };
+  ws.autoFilter = { from: "A1", to: "AD1" };
 
   return wb;
 }

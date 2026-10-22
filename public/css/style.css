@@ -220,6 +220,23 @@ table a {
   cursor: pointer;
 }
 
+/* Campo de custo manual na tabela */
+.custo-group .input-group-text {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  color: var(--mh-muted);
+}
+
+.custo-input {
+  max-width: 80px;
+  font-size: 0.8rem;
+  padding: 0.15rem 0.4rem;
+}
+
+.custo-input.saving {
+  opacity: 0.6;
+}
+
 /* ===== Badges / pílulas ===== */
 .badge {
   font-weight: 600;

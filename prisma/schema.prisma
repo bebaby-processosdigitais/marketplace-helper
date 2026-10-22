@@ -72,6 +72,7 @@ model Item {
   variacaoSkus  String?
   marca         String?
   titulo        String   @default("")
+  custoProduto  Float?
   precoDe       Float    @default(0)
   precoPor      Float    @default(0)
   frete         Float?
