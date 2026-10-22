@@ -1,0 +1,10 @@
+{
+  "name": "marketplace-helper-lp",
+  "version": "1.0.0",
+  "description": "Landing page comercial do Marketplace Helper (site estatico)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marketplace Helper — Lucre mais no Mercado Livre com dados reais</title>
+  <meta name="description" content="Veja lucro, margem, comissão e frete de cada anúncio do Mercado Livre. Simule preços, acompanhe a saúde do catálogo e pare de vender no prejuízo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg lp-nav sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#top"><i class="bi bi-box-seam text-primary"></i> Marketplace Helper</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#lpnav"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="lpnav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+          <li class="nav-item"><a class="nav-link" href="#recursos">Recursos</a></li>
+          <li class="nav-item"><a class="nav-link" href="#como-funciona">Como funciona</a></li>
+          <li class="nav-item"><a class="nav-link" href="#planos">Planos</a></li>
+          <li class="nav-item ms-lg-2"><a class="btn btn-primary px-3" href="/login" data-app-link><i class="bi bi-box-arrow-in-right"></i> Entrar no sistema</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header id="top" class="hero">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <span class="badge-pill mb-3"><i class="bi bi-lightning-charge-fill"></i> Inteligência para vendedores do Mercado Livre</span>
+          <h1 class="display-4 fw-bold mb-3">Pare de vender no escuro. Venda com <span class="text-primary">lucro real</span>.</h1>
+          <p class="lead text-muted mb-4">
+            O Marketplace Helper mostra <strong>lucro, margem, comissão e frete</strong> de cada anúncio,
+            simula preços no Clássico e Premium e aponta o que precisa de correção — tudo puxado
+            direto da API do Mercado Livre.
+          </p>
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            <a class="btn btn-primary btn-lg px-4" href="/login" data-app-link><i class="bi bi-box-arrow-in-right"></i> Entrar no sistema</a>
+            <a class="btn btn-outline-secondary btn-lg px-4" href="#recursos">Ver recursos</a>
+          </div>
+          <div class="d-flex flex-wrap gap-4 text-muted small">
+            <span><i class="bi bi-check-circle-fill text-success"></i> Lucro por anúncio</span>
+            <span><i class="bi bi-check-circle-fill text-success"></i> Sincronização automática</span>
+            <span><i class="bi bi-check-circle-fill text-success"></i> Dados reais do ML</span>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <!-- Mockup estilizado do painel -->
+          <div class="mockup shadow-lg">
+            <div class="mockup-bar"><span></span><span></span><span></span></div>
+            <div class="mockup-body">
+              <div class="row g-2 mb-2">
+                <div class="col-4"><div class="mk-kpi"><small>Margem média</small><strong>27,4%</strong></div></div>
+                <div class="col-4"><div class="mk-kpi"><small>No prejuízo</small><strong class="text-danger">3</strong></div></div>
+                <div class="col-4"><div class="mk-kpi"><small>Saudáveis</small><strong class="text-success">82%</strong></div></div>
+              </div>
+              <div class="mk-row"><span class="mk-img"></span><div class="flex-grow-1"><div class="mk-line w-75"></div><div class="mk-line w-50 mt-1"></div></div><span class="mk-badge ok">+R$ 214</span></div>
+              <div class="mk-row"><span class="mk-img"></span><div class="flex-grow-1"><div class="mk-line w-50"></div><div class="mk-line w-25 mt-1"></div></div><span class="mk-badge bad">−R$ 35</span></div>
+              <div class="mk-row"><span class="mk-img"></span><div class="flex-grow-1"><div class="mk-line w-75"></div><div class="mk-line w-50 mt-1"></div></div><span class="mk-badge ok">+R$ 88</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Recursos -->
+  <section id="recursos" class="py-6">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Tudo que você precisa para decidir com dados</h2>
+        <p class="text-muted">Da comissão ao lucro líquido, o Marketplace Helper faz a conta por você.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4"><div class="feature-card h-100">
+          <div class="feature-ico"><i class="bi bi-graph-up-arrow"></i></div>
+          <h5>Lucro e margem por anúncio</h5>
+          <p class="text-muted mb-0">Preço de venda menos custo, comissão, frete e impostos. Veja na hora quanto cada anúncio realmente rende.</p>
+        </div></div>
+        <div class="col-md-6 col-lg-4"><div class="feature-card h-100">
+          <div class="feature-ico"><i class="bi bi-speedometer2"></i></div>
+          <h5>Dashboard inteligente</h5>
+          <p class="text-muted mb-0">KPIs de rentabilidade e saúde, além de insights que apontam anúncios no prejuízo, sem estoque ou com margem baixa.</p>
+        </div></div>
+        <div class="col-md-6 col-lg-4"><div class="feature-card h-100">
+          <div class="feature-ico"><i class="bi bi-calculator"></i></div>
+          <h5>Simulador de anúncio</h5>
+          <p class="text-muted mb-0">Antes de anunciar, simule o retorno no Clássico e no Premium — com comissão e frete estimados automaticamente.</p>
+        </div></div>
+        <div class="col-md-6 col-lg-4"><div class="feature-card h-100">
+          <div class="feature-ico"><i class="bi bi-box2"></i></div>
+          <h5>Custos por produto (SKU)</h5>
+          <p class="text-muted mb-0">Preencha o custo uma vez por SKU e ele é aplicado a todos os anúncios daquele produto. Sua margem fica real rapidinho.</p>
+        </div></div>
+        <div class="col-md-6 col-lg-4"><div class="feature-card h-100">
+          <div class="feature-ico"><i class="bi bi-truck"></i></div>
+          <h5>Comissão e frete reais</h5>
+          <p class="text-muted mb-0">Puxamos a tarifa de venda e o custo de frete direto do Mercado Livre — nada de estimativa chutada.</p>
+        </div></div>
+        <div class="col-md-6 col-lg-4"><div class="feature-card h-100">
+          <div class="feature-ico"><i class="bi bi-arrow-repeat"></i></div>
+          <h5>Sincronização automática</h5>
+          <p class="text-muted mb-0">Seus anúncios atualizados sozinhos às 00h e 12h. Exporte tudo para Excel quando quiser.</p>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Como funciona -->
+  <section id="como-funciona" class="py-6 bg-soft">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Comece em 3 passos</h2>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4 text-center">
+          <div class="step-num">1</div>
+          <h5 class="mt-3">Conecte sua conta</h5>
+          <p class="text-muted">Autorize o Marketplace Helper a acessar seus anúncios pela API oficial do Mercado Livre.</p>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="step-num">2</div>
+          <h5 class="mt-3">Sincronize os anúncios</h5>
+          <p class="text-muted">Um clique importa preços, fretes, comissões e vendas de todo o seu catálogo.</p>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="step-num">3</div>
+          <h5 class="mt-3">Lucre com clareza</h5>
+          <p class="text-muted">Preencha os custos, veja a margem de cada item e corrija o que está no vermelho.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA / Planos -->
+  <section id="planos" class="py-6">
+    <div class="container">
+      <div class="cta-box text-center">
+        <h2 class="fw-bold mb-2">Pronto para enxergar seu lucro de verdade?</h2>
+        <p class="text-muted mb-4">Entre no sistema e comece a tomar decisões baseadas em dados hoje mesmo.</p>
+        <a class="btn btn-primary btn-lg px-5" href="/login" data-app-link><i class="bi bi-box-arrow-in-right"></i> Entrar no sistema</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="lp-footer">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <span class="fw-semibold"><i class="bi bi-box-seam text-primary"></i> Marketplace Helper</span>
+      <span class="text-muted small">Feito para vendedores do Mercado Livre.</span>
+      <a class="btn btn-sm btn-outline-secondary" href="/login" data-app-link>Entrar</a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="config.js"></script>
+</body>
+</html>
