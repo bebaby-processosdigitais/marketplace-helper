@@ -69,15 +69,21 @@ export async function getDashboardData(userId) {
 
   let somaMargem = 0, countMargem = 0;
   let prejuizo = 0, margemBaixa = 0;
-  let saudaveis = 0, comCusto = 0;
+  let semProblema = 0, comCusto = 0;
   let somaTicket = 0, countTicket = 0;
   let semEstoqueAtivos = 0, semCustoAtivos = 0, semVendasAtivos = 0, freteSubiu = 0;
 
   for (const it of allItems) {
     const calc = computeProfit(it, rules);
-    const health = computeHealth(it, calc);
-    if (health.label === "Saudável") saudaveis++;
     if (it.custoProduto != null) comCusto++;
+
+    // "Sem problema" = saúde operacional, NÃO exige custo preenchido.
+    // Problema = inativo, sem estoque, ou (com custo) margem < 10%.
+    const problema =
+      it.status !== "active" ||
+      (it.estoque || 0) <= 0 ||
+      (it.custoProduto != null && calc.margem != null && calc.margem < 10);
+    if (!problema) semProblema++;
 
     if (it.freteMudou && it.frete != null && it.freteAnterior != null && it.frete > it.freteAnterior) {
       freteSubiu++;
@@ -99,7 +105,7 @@ export async function getDashboardData(userId) {
 
   const margemMedia = countMargem ? somaMargem / countMargem : null;
   const ticketMedio = countTicket ? somaTicket / countTicket : 0;
-  const pctSaudaveis = allItems.length ? (saudaveis / allItems.length) * 100 : 0;
+  const pctSaudaveis = allItems.length ? (semProblema / allItems.length) * 100 : 0;
   const coberturaCusto = allItems.length ? (comCusto / allItems.length) * 100 : 0;
 
   // ===== Insights inteligentes (só mostra o que tiver ocorrência) =====
@@ -124,6 +130,8 @@ export async function getDashboardData(userId) {
     ticketMedio,
     pctSaudaveis,
     coberturaCusto,
+    comCusto,
+    countMargem,
     prejuizo,
     semEstoqueAtivos,
     total,

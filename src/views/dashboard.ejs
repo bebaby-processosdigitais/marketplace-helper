@@ -11,7 +11,7 @@
       <div class="card kpi shadow-sm h-100"><div class="card-body">
         <div class="kpi-label">Margem média</div>
         <div class="kpi-value"><%= margemMedia != null ? margemMedia.toFixed(1) + '%' : '—' %></div>
-        <small class="text-muted">dos itens com custo</small>
+        <small class="text-muted"><%= countMargem %> item(ns) com custo</small>
       </div></div>
     </div>
     <div class="col">
@@ -25,14 +25,14 @@
       <div class="card kpi shadow-sm h-100"><div class="card-body">
         <div class="kpi-label">Saudáveis</div>
         <div class="kpi-value text-success"><%= pctSaudaveis.toFixed(0) %>%</div>
-        <small class="text-muted">do catálogo</small>
+        <small class="text-muted">sem problemas</small>
       </div></div>
     </div>
     <div class="col">
       <div class="card kpi shadow-sm h-100"><div class="card-body">
         <div class="kpi-label">Cobertura de custo</div>
-        <div class="kpi-value"><%= coberturaCusto.toFixed(0) %>%</div>
-        <small class="text-muted">com custo preenchido</small>
+        <div class="kpi-value"><%= coberturaCusto < 1 && coberturaCusto > 0 ? coberturaCusto.toFixed(1) : coberturaCusto.toFixed(0) %>%</div>
+        <small class="text-muted"><%= comCusto %> de <%= total %> com custo</small>
       </div></div>
     </div>
     <div class="col">
