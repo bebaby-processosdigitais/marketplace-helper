@@ -121,17 +121,17 @@ export async function getDashboardData(userId) {
   // ===== Insights inteligentes (só mostra o que tiver ocorrência) =====
   const insights = [];
   if (estoqueBaixo > 0)
-    insights.push({ color: "danger", icon: "box-seam", titulo: `${estoqueBaixo} anúncio(s) ativos com estoque baixo`, texto: "Até 5 unidades. Reabasteça para não perder posição no ranking do Mercado Livre.", link: "/?filter=estoque_baixo" });
+    insights.push({ color: "danger", icon: "box-seam", titulo: `${estoqueBaixo} anúncio(s) ativos com estoque baixo`, texto: "Até 5 unidades. Reabasteça para não perder posição no ranking do Mercado Livre.", link: "/anuncios?filter=estoque_baixo" });
   if (prejuizo > 0)
-    insights.push({ color: "danger", icon: "graph-down-arrow", titulo: `${prejuizo} anúncio(s) no prejuízo`, texto: "Margem negativa — revise preço, custo do produto ou frete.", link: "/?filter=prejuizo" });
+    insights.push({ color: "danger", icon: "graph-down-arrow", titulo: `${prejuizo} anúncio(s) no prejuízo`, texto: "Margem negativa — revise preço, custo do produto ou frete.", link: "/anuncios?filter=prejuizo" });
   if (baixoDesempenho > 0)
-    insights.push({ color: "warning", icon: "exclamation-triangle", titulo: `${baixoDesempenho} anúncio(s) com baixo desempenho`, texto: "Margem abaixo de 8%. Considere reajustar o preço.", link: "/?filter=baixo" });
+    insights.push({ color: "warning", icon: "exclamation-triangle", titulo: `${baixoDesempenho} anúncio(s) com baixo desempenho`, texto: "Margem abaixo de 8%. Considere reajustar o preço.", link: "/anuncios?filter=baixo" });
   if (semCustoAtivos > 0)
-    insights.push({ color: "secondary", icon: "tag", titulo: `${semCustoAtivos} anúncio(s) ativos sem custo preenchido`, texto: "Preencha o custo na coluna 'Custo' para calcular a margem real.", link: "/?filter=sem_custo" });
+    insights.push({ color: "secondary", icon: "tag", titulo: `${semCustoAtivos} anúncio(s) ativos sem custo preenchido`, texto: "Preencha o custo na coluna 'Custo' para calcular a margem real.", link: "/anuncios?filter=sem_custo" });
   if (semVendasAtivos > 0)
-    insights.push({ color: "secondary", icon: "cart-x", titulo: `${semVendasAtivos} anúncio(s) ativos sem nenhuma venda`, texto: "Revise título, fotos e preço para destravar as vendas.", link: "/?sort=vendas&dir=asc" });
+    insights.push({ color: "secondary", icon: "cart-x", titulo: `${semVendasAtivos} anúncio(s) ativos sem nenhuma venda`, texto: "Revise título, fotos e preço para destravar as vendas.", link: "/anuncios?sort=vendas&dir=asc" });
   if (freteSubiu > 0)
-    insights.push({ color: "warning", icon: "truck", titulo: `Frete subiu em ${freteSubiu} anúncio(s)`, texto: "O custo de frete aumentou no último sync — reveja a margem desses itens.", link: "/?sort=frete&dir=desc" });
+    insights.push({ color: "warning", icon: "truck", titulo: `Frete subiu em ${freteSubiu} anúncio(s)`, texto: "O custo de frete aumentou no último sync — reveja a margem desses itens.", link: "/anuncios?sort=frete&dir=desc" });
 
   return {
     ultimosAnuncios,

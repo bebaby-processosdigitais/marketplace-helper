@@ -47,7 +47,8 @@ router.post("/logout", logout);
 // ===== Daqui pra baixo exige login =====
 router.use(requireAuth);
 
-router.get("/", showItems);
+router.get("/", showDashboard);
+router.get("/anuncios", showItems);
 router.get("/dashboard", showDashboard);
 router.get("/produtos", showProducts);
 router.get("/regras", showRules);

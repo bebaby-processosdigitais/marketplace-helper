@@ -37,18 +37,18 @@
   <!-- Desempenho (clicáveis -> abrem a lista filtrada) -->
   <div class="kpi-group-label"><i class="bi bi-graph-up"></i> Desempenho</div>
   <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
-    <%- kpiLink('/?filter=prejuizo', 'No prejuízo', prejuizo, prejuizo > 0 ? 'text-danger' : '', comCustoSub, 'graph-down-arrow', 'danger') %>
-    <%- kpiLink('/?filter=baixo', 'Baixo desempenho', baixoDesempenho, baixoDesempenho > 0 ? 'text-warning' : '', 'margem 0–8% · ' + comCustoSub, 'exclamation-triangle', 'warning') %>
-    <%- kpiLink('/?filter=alto', 'Alto desempenho', altoDesempenho, altoDesempenho > 0 ? 'text-success' : '', 'margem ≥ 8% · ' + comCustoSub, 'graph-up-arrow', 'success') %>
-    <%- kpiLink('/?filter=catalogo', 'No catálogo', catalogo, catalogo > 0 ? 'text-primary' : '', 'anúncios de catálogo', 'trophy', 'primary') %>
+    <%- kpiLink('/anuncios?filter=prejuizo', 'No prejuízo', prejuizo, prejuizo > 0 ? 'text-danger' : '', comCustoSub, 'graph-down-arrow', 'danger') %>
+    <%- kpiLink('/anuncios?filter=baixo', 'Baixo desempenho', baixoDesempenho, baixoDesempenho > 0 ? 'text-warning' : '', 'margem 0–8% · ' + comCustoSub, 'exclamation-triangle', 'warning') %>
+    <%- kpiLink('/anuncios?filter=alto', 'Alto desempenho', altoDesempenho, altoDesempenho > 0 ? 'text-success' : '', 'margem ≥ 8% · ' + comCustoSub, 'graph-up-arrow', 'success') %>
+    <%- kpiLink('/anuncios?filter=catalogo', 'No catálogo', catalogo, catalogo > 0 ? 'text-primary' : '', 'anúncios de catálogo', 'trophy', 'primary') %>
   </div>
 
   <!-- Estoque & cadastro -->
   <div class="kpi-group-label"><i class="bi bi-box-seam"></i> Estoque &amp; cadastro</div>
   <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
-    <%- kpiLink('/?filter=estoque_baixo', 'Estoque baixo', estoqueBaixo, estoqueBaixo > 0 ? 'text-danger' : '', '≤ 5 unidades · ativos', 'box-seam', 'danger') %>
-    <%- kpiLink('/?filter=full_estoque_baixo', 'Full · estoque baixo', fullEstoqueBaixo, fullEstoqueBaixo > 0 ? 'text-danger' : '', '≤ 5 no Full · ativos', 'lightning-charge-fill', 'warning') %>
-    <%- kpiLink('/?filter=sem_custo', 'Sem custo', semCustoAtivos, semCustoAtivos > 0 ? 'text-secondary' : '', 'preencher para ver margem', 'tag', 'secondary') %>
+    <%- kpiLink('/anuncios?filter=estoque_baixo', 'Estoque baixo', estoqueBaixo, estoqueBaixo > 0 ? 'text-danger' : '', '≤ 5 unidades · ativos', 'box-seam', 'danger') %>
+    <%- kpiLink('/anuncios?filter=full_estoque_baixo', 'Full · estoque baixo', fullEstoqueBaixo, fullEstoqueBaixo > 0 ? 'text-danger' : '', '≤ 5 no Full · ativos', 'lightning-charge-fill', 'warning') %>
+    <%- kpiLink('/anuncios?filter=sem_custo', 'Sem custo', semCustoAtivos, semCustoAtivos > 0 ? 'text-secondary' : '', 'preencher para ver margem', 'tag', 'secondary') %>
     <%- kpiValue('Ticket médio', 'R$ ' + ticketMedio.toFixed(2), '', 'preço de venda · ativos', 'cash-coin', 'primary') %>
   </div>
 

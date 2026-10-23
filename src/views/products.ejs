@@ -27,7 +27,7 @@
       · página <%= page %> de <%= totalPages %>
     </small>
     <% if (semSku > 0) { %>
-      <small class="text-muted"><i class="bi bi-info-circle"></i> <%= semSku %> anúncio(s) sem SKU — edite o custo deles na tela de <a href="/">Anúncios</a>.</small>
+      <small class="text-muted"><i class="bi bi-info-circle"></i> <%= semSku %> anúncio(s) sem SKU — edite o custo deles na tela de <a href="/anuncios">Anúncios</a>.</small>
     <% } %>
   </div>
 
@@ -61,7 +61,7 @@
             <td class="fw-semibold"><%= p.sku %></td>
             <td class="text-truncate" style="max-width: 360px;" title="<%= p.nome %>"><%= p.nome %></td>
             <td class="text-center">
-              <a href="/?search=<%= encodeURIComponent(p.sku) %>" class="badge text-bg-primary text-decoration-none" title="Ver anúncios deste SKU">
+              <a href="/anuncios?search=<%= encodeURIComponent(p.sku) %>" class="badge text-bg-primary text-decoration-none" title="Ver anúncios deste SKU">
                 <%= p.qtd %>
               </a>
             </td>

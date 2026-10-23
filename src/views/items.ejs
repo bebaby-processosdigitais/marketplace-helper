@@ -6,7 +6,7 @@
   // Helpers de ordenacao
   function sortUrl(col) {
     var d = (sort === col && dir === 'asc') ? 'desc' : 'asc';
-    var p = '/?sort=' + col + '&dir=' + d;
+    var p = '/anuncios?sort=' + col + '&dir=' + d;
     if (search) p += '&search=' + encodeURIComponent(search);
     if (filter) p += '&filter=' + encodeURIComponent(filter);
     return p;
@@ -27,7 +27,7 @@
 
   <!-- Barra de acoes -->
   <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-    <form class="d-flex flex-grow-1" method="get" action="/" role="search">
+    <form class="d-flex flex-grow-1" method="get" action="/anuncios" role="search">
       <input type="hidden" name="sort" value="<%= sort %>" />
       <input type="hidden" name="dir" value="<%= dir %>" />
       <% if (filter) { %><input type="hidden" name="filter" value="<%= filter %>" /><% } %>
@@ -40,7 +40,7 @@
         />
         <button class="btn btn-outline-secondary" type="submit">Buscar</button>
         <% if (search) { %>
-          <a href="/" class="btn btn-outline-danger" title="Limpar"><i class="bi bi-x-lg"></i></a>
+          <a href="/anuncios" class="btn btn-outline-danger" title="Limpar"><i class="bi bi-x-lg"></i></a>
         <% } %>
       </div>
     </form>
@@ -96,7 +96,7 @@
 
   <!-- Filtro ativo (vindo dos KPIs do Dashboard) -->
   <% if (filter && filterLabel) {
-       var clearUrl = '/' + (search ? '?search=' + encodeURIComponent(search) : '');
+       var clearUrl = '/anuncios' + (search ? '?search=' + encodeURIComponent(search) : '');
   %>
     <div class="mb-2">
       <span class="badge rounded-pill text-bg-primary fs-6 fw-normal py-2 px-3">
@@ -222,7 +222,7 @@
   <div class="view-pane view-pane-cards">
     <%
       function msort(c, d) {
-        var u = "/?sort=" + c + "&dir=" + d;
+        var u = "/anuncios?sort=" + c + "&dir=" + d;
         if (search) u += "&search=" + encodeURIComponent(search);
         if (filter) u += "&filter=" + encodeURIComponent(filter);
         return u;
@@ -231,7 +231,7 @@
         var parts = [];
         if (search) parts.push("search=" + encodeURIComponent(search));
         if (filter) parts.push("filter=" + encodeURIComponent(filter));
-        return "/" + (parts.length ? "?" + parts.join("&") : "");
+        return "/anuncios" + (parts.length ? "?" + parts.join("&") : "");
       }
       function sel(c, d) { return sort === c && dir === d ? "selected" : ""; }
     %>
@@ -295,7 +295,7 @@
   <% if (totalPages > 1) { %>
     <%
       function pageUrl(p) {
-        var u = '/?page=' + p;
+        var u = '/anuncios?page=' + p;
         if (search) u += '&search=' + encodeURIComponent(search);
         if (sort) u += '&sort=' + sort + '&dir=' + dir;
         if (filter) u += '&filter=' + encodeURIComponent(filter);
