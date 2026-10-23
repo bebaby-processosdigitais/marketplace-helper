@@ -206,7 +206,7 @@
             <td class="text-end"><%= it.visitas %></td>
             <td class="text-end"><%= it.vendas %></td>
             <td class="text-end"><%= it.estoque %></td>
-            <td class="text-center"><% if (it.full) { %><i class="bi bi-check-circle-fill" style="color: var(--mh-primary)"></i><% } %></td>
+            <td class="text-center"><% if (it.full) { %><span class="badge text-bg-success"><i class="bi bi-lightning-charge-fill"></i> Full</span><% } %></td>
             <td class="text-center">
               <span class="badge <%= it.status === 'active' ? 'text-bg-success' : 'text-bg-secondary' %>">
                 <%= it.status || '-' %>
@@ -268,7 +268,7 @@
               <div class="small mb-1 text-muted">
                 <a href="<%= mlUrl(it) %>" target="_blank" rel="noopener" class="text-decoration-none"><%= it.mlb %></a>
                 · <span class="badge <%= it.status === 'active' ? 'text-bg-success' : 'text-bg-secondary' %>"><%= it.status || '-' %></span>
-                <% if (it.full) { %> · <i class="bi bi-check-circle-fill text-primary" title="Full"></i><% } %>
+                <% if (it.full) { %> · <span class="badge text-bg-success"><i class="bi bi-lightning-charge-fill"></i> Full</span><% } %>
                 · <%= it.tipoAnuncio %>
               </div>
               <div class="row g-1 small">
