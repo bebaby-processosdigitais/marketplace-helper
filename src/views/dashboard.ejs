@@ -5,48 +5,75 @@
 <div class="container-fluid py-3 px-md-4">
   <h3 class="mb-3"><i class="bi bi-speedometer2"></i> Dashboard</h3>
 
-  <!-- KPIs de rentabilidade e saúde -->
-  <div class="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-3 mb-4">
-    <div class="col">
-      <div class="card kpi shadow-sm h-100"><div class="card-body">
-        <div class="kpi-label">Margem média</div>
-        <div class="kpi-value"><%= margemMedia != null ? margemMedia.toFixed(1) + '%' : '—' %></div>
-        <small class="text-muted"><%= countMargem %> item(ns) com custo</small>
-      </div></div>
-    </div>
-    <div class="col">
-      <div class="card kpi shadow-sm h-100"><div class="card-body">
-        <div class="kpi-label">No prejuízo</div>
-        <div class="kpi-value <%= prejuizo > 0 ? 'text-danger' : '' %>"><%= prejuizo %></div>
-        <small class="text-muted">margem negativa</small>
-      </div></div>
-    </div>
-    <div class="col">
-      <div class="card kpi shadow-sm h-100"><div class="card-body">
-        <div class="kpi-label">Saudáveis</div>
-        <div class="kpi-value text-success"><%= pctSaudaveis.toFixed(0) %>%</div>
-        <small class="text-muted">sem problemas</small>
-      </div></div>
-    </div>
-    <div class="col">
-      <div class="card kpi shadow-sm h-100"><div class="card-body">
-        <div class="kpi-label">Cobertura de custo</div>
-        <div class="kpi-value"><%= coberturaCusto < 1 && coberturaCusto > 0 ? coberturaCusto.toFixed(1) : coberturaCusto.toFixed(0) %>%</div>
-        <small class="text-muted"><%= comCusto %> de <%= total %> com custo</small>
-      </div></div>
-    </div>
+  <%
+    // Atalho para montar um KPI clicável que leva à lista de anúncios filtrada.
+    function kpiLink(href, label, value, valueClass, sub, icon) {
+      return '<div class="col"><a href="' + href + '" class="card kpi kpi-link shadow-sm h-100 text-decoration-none">'
+        + '<div class="card-body">'
+        + '<div class="kpi-label">' + label + '</div>'
+        + '<div class="kpi-value ' + (valueClass || '') + '">' + value + '</div>'
+        + '<small class="text-muted"><i class="bi bi-' + icon + '"></i> ' + sub + '</small>'
+        + '<span class="kpi-go"><i class="bi bi-arrow-right-circle"></i></span>'
+        + '</div></a></div>';
+    }
+    var comCustoSub = countMargem + ' com custo';
+  %>
+
+  <!-- Desempenho (clicáveis -> abrem a lista filtrada) -->
+  <div class="kpi-group-label"><i class="bi bi-graph-up"></i> Desempenho</div>
+  <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <%- kpiLink('/?filter=prejuizo', 'No prejuízo', prejuizo, prejuizo > 0 ? 'text-danger' : '', comCustoSub, 'ver anúncios') %>
+    <%- kpiLink('/?filter=baixo', 'Baixo desempenho', baixoDesempenho, baixoDesempenho > 0 ? 'text-warning' : '', 'margem 0–8% · ' + comCustoSub, 'ver anúncios') %>
+    <%- kpiLink('/?filter=alto', 'Alto desempenho', altoDesempenho, altoDesempenho > 0 ? 'text-success' : '', 'margem ≥ 8% · ' + comCustoSub, 'ver anúncios') %>
+    <%- kpiLink('/?filter=catalogo', 'No catálogo', catalogo, catalogo > 0 ? 'text-primary' : '', 'anúncios de catálogo', 'ver anúncios') %>
+  </div>
+
+  <!-- Estoque & cadastro -->
+  <div class="kpi-group-label"><i class="bi bi-box-seam"></i> Estoque &amp; cadastro</div>
+  <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <%- kpiLink('/?filter=estoque_baixo', 'Estoque baixo', estoqueBaixo, estoqueBaixo > 0 ? 'text-danger' : '', '≤ 5 unidades · ativos', 'ver anúncios') %>
+    <%- kpiLink('/?filter=full_estoque_baixo', 'Full · estoque baixo', fullEstoqueBaixo, fullEstoqueBaixo > 0 ? 'text-danger' : '', '≤ 5 no Full · ativos', 'ver anúncios') %>
+    <%- kpiLink('/?filter=sem_custo', 'Sem custo', semCustoAtivos, semCustoAtivos > 0 ? 'text-secondary' : '', 'preencher para ver margem', 'ver anúncios') %>
     <div class="col">
       <div class="card kpi shadow-sm h-100"><div class="card-body">
         <div class="kpi-label">Ticket médio</div>
         <div class="kpi-value">R$ <%= ticketMedio.toFixed(2) %></div>
-        <small class="text-muted">preço de venda</small>
+        <small class="text-muted"><i class="bi bi-cash-coin"></i> preço de venda · ativos</small>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Saúde financeira (valores) -->
+  <div class="kpi-group-label"><i class="bi bi-wallet2"></i> Saúde financeira</div>
+  <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <div class="col">
+      <div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="kpi-label">Custo médio do ML</div>
+        <div class="kpi-value"><%= custoMLMedioPct != null ? custoMLMedioPct.toFixed(1) + '%' : '—' %></div>
+        <small class="text-muted"><i class="bi bi-percent"></i> comissão + frete / preço</small>
       </div></div>
     </div>
     <div class="col">
       <div class="card kpi shadow-sm h-100"><div class="card-body">
-        <div class="kpi-label">Sem estoque</div>
-        <div class="kpi-value <%= semEstoqueAtivos > 0 ? 'text-danger' : '' %>"><%= semEstoqueAtivos %></div>
-        <small class="text-muted">ativos</small>
+        <div class="kpi-label">Lucro líquido médio</div>
+        <div class="kpi-value <%= lucroMedio != null ? (lucroMedio >= 0 ? 'text-success' : 'text-danger') : '' %>">
+          <%= lucroMedio != null ? 'R$ ' + lucroMedio.toFixed(2) : '—' %>
+        </div>
+        <small class="text-muted"><i class="bi bi-coin"></i> por anúncio · <%= comCustoSub %></small>
+      </div></div>
+    </div>
+    <div class="col">
+      <div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="kpi-label">Margem média</div>
+        <div class="kpi-value"><%= margemMedia != null ? margemMedia.toFixed(1) + '%' : '—' %></div>
+        <small class="text-muted"><i class="bi bi-graph-up-arrow"></i> <%= comCustoSub %></small>
+      </div></div>
+    </div>
+    <div class="col">
+      <div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="kpi-label">Com custo preenchido</div>
+        <div class="kpi-value"><%= comCusto %> <small class="text-muted fs-6">de <%= total %></small></div>
+        <small class="text-muted"><i class="bi bi-check2-circle"></i> cobertura de custo</small>
       </div></div>
     </div>
   </div>

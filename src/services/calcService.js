@@ -47,7 +47,7 @@ export function computeHealth(item, calc) {
   if (calc.margem != null && calc.margem < 0) {
     return { label: "Prejuízo", color: "danger", icon: "graph-down-arrow" };
   }
-  if (calc.margem != null && calc.margem < 10) {
+  if (calc.margem != null && calc.margem < 8) {
     return { label: "Margem baixa", color: "warning", icon: "exclamation-circle" };
   }
   return { label: "Saudável", color: "success", icon: "check-circle" };

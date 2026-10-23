@@ -8,6 +8,7 @@
     var d = (sort === col && dir === 'asc') ? 'desc' : 'asc';
     var p = '/?sort=' + col + '&dir=' + d;
     if (search) p += '&search=' + encodeURIComponent(search);
+    if (filter) p += '&filter=' + encodeURIComponent(filter);
     return p;
   }
   function arrow(col) {
@@ -29,6 +30,7 @@
     <form class="d-flex flex-grow-1" method="get" action="/" role="search">
       <input type="hidden" name="sort" value="<%= sort %>" />
       <input type="hidden" name="dir" value="<%= dir %>" />
+      <% if (filter) { %><input type="hidden" name="filter" value="<%= filter %>" /><% } %>
       <div class="input-group">
         <span class="input-group-text"><i class="bi bi-search"></i></span>
         <input
@@ -92,11 +94,26 @@
     </div>
   <% } %>
 
+  <!-- Filtro ativo (vindo dos KPIs do Dashboard) -->
+  <% if (filter && filterLabel) {
+       var clearUrl = '/' + (search ? '?search=' + encodeURIComponent(search) : '');
+  %>
+    <div class="mb-2">
+      <span class="badge rounded-pill text-bg-primary fs-6 fw-normal py-2 px-3">
+        <i class="bi bi-funnel-fill"></i> <%= filterLabel %>
+        <a href="<%= clearUrl %>" class="text-white text-decoration-none ms-2" title="Limpar filtro">
+          <i class="bi bi-x-circle-fill"></i>
+        </a>
+      </span>
+    </div>
+  <% } %>
+
   <!-- Info -->
   <div class="d-flex justify-content-between align-items-center mb-2">
     <small class="text-muted">
       <strong><%= total %></strong> anúncio(s)
       <% if (search) { %> para "<strong><%= search %></strong>"<% } %>
+      <% if (filter && filterLabel) { %> <span class="text-primary">· filtrado</span><% } %>
       · página <%= page %> de <%= totalPages %>
     </small>
   </div>
@@ -207,13 +224,20 @@
       function msort(c, d) {
         var u = "/?sort=" + c + "&dir=" + d;
         if (search) u += "&search=" + encodeURIComponent(search);
+        if (filter) u += "&filter=" + encodeURIComponent(filter);
         return u;
+      }
+      function mdefault() {
+        var parts = [];
+        if (search) parts.push("search=" + encodeURIComponent(search));
+        if (filter) parts.push("filter=" + encodeURIComponent(filter));
+        return "/" + (parts.length ? "?" + parts.join("&") : "");
       }
       function sel(c, d) { return sort === c && dir === d ? "selected" : ""; }
     %>
     <div class="mb-2">
       <select class="form-select form-select-sm" onchange="if(this.value){window.location.href=this.value}">
-        <option value="/<%= search ? '?search=' + encodeURIComponent(search) : '' %>" <%= !sort ? 'selected' : '' %>>Ordenar: padrão</option>
+        <option value="<%= mdefault() %>" <%= !sort ? 'selected' : '' %>>Ordenar: padrão</option>
         <option value="<%= msort('margem','desc') %>" <%= sel('margem','desc') %>>Margem (maior)</option>
         <option value="<%= msort('margem','asc') %>" <%= sel('margem','asc') %>>Margem (menor)</option>
         <option value="<%= msort('lucro','desc') %>" <%= sel('lucro','desc') %>>Lucro (maior)</option>
@@ -274,6 +298,7 @@
         var u = '/?page=' + p;
         if (search) u += '&search=' + encodeURIComponent(search);
         if (sort) u += '&sort=' + sort + '&dir=' + dir;
+        if (filter) u += '&filter=' + encodeURIComponent(filter);
         return u;
       }
     %>

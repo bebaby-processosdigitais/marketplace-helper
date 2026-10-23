@@ -461,6 +461,52 @@ table a {
   font-weight: 700;
 }
 
+/* ===== KPIs do dashboard ===== */
+.kpi-group-label {
+  font-size: 0.72rem;
+  color: var(--mh-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-group-label i {
+  color: var(--mh-primary);
+}
+
+/* KPI clicável: leva à lista de anúncios filtrada */
+.kpi-link {
+  position: relative;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.kpi-link:hover {
+  transform: translateY(-2px);
+  border-color: var(--mh-primary);
+  box-shadow: 0 4px 14px rgba(31, 47, 86, 0.14);
+}
+
+.kpi-link .kpi-label,
+.kpi-link .kpi-value {
+  transition: color 0.15s ease;
+}
+
+.kpi-go {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  color: var(--mh-border);
+  font-size: 1.05rem;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.kpi-link:hover .kpi-go {
+  color: var(--mh-primary);
+  transform: translateX(2px);
+}
+
 /* ===== Insights inteligentes ===== */
 .insight-item {
   transition: background 0.15s;

@@ -64,26 +64,22 @@ export async function getDashboardData(userId) {
     if (f.frete != null && f.freteAnterior != null) deltaTotal += f.frete - f.freteAnterior;
   }
 
-  // ===== Passada única para KPIs de rentabilidade/saúde e insights =====
+  // ===== Passada única para KPIs e insights =====
   const allItems = await prisma.item.findMany({ where: { userId } });
 
-  let somaMargem = 0, countMargem = 0;
-  let prejuizo = 0, margemBaixa = 0;
-  let semProblema = 0, comCusto = 0;
+  let somaMargem = 0, countMargem = 0, somaLucro = 0;
+  let prejuizo = 0, baixoDesempenho = 0, altoDesempenho = 0;
+  let comCusto = 0;
   let somaTicket = 0, countTicket = 0;
+  let somaCustoMLpct = 0, countCustoMLpct = 0;
   let semEstoqueAtivos = 0, semCustoAtivos = 0, semVendasAtivos = 0, freteSubiu = 0;
+  let estoqueBaixo = 0, fullEstoqueBaixo = 0;
+
+  const LIMIAR = 8; // limiar de desempenho (margem %) acordado com o usuário
 
   for (const it of allItems) {
     const calc = computeProfit(it, rules);
     if (it.custoProduto != null) comCusto++;
-
-    // "Sem problema" = saúde operacional, NÃO exige custo preenchido.
-    // Problema = inativo, sem estoque, ou (com custo) margem < 10%.
-    const problema =
-      it.status !== "active" ||
-      (it.estoque || 0) <= 0 ||
-      (it.custoProduto != null && calc.margem != null && calc.margem < 10);
-    if (!problema) semProblema++;
 
     if (it.freteMudou && it.frete != null && it.freteAnterior != null && it.frete > it.freteAnterior) {
       freteSubiu++;
@@ -91,33 +87,47 @@ export async function getDashboardData(userId) {
 
     if (it.status === "active") {
       if ((it.estoque || 0) <= 0) semEstoqueAtivos++;
+      if ((it.estoque || 0) <= 5) {
+        estoqueBaixo++;
+        if (it.full) fullEstoqueBaixo++;
+      }
       if (it.custoProduto == null) semCustoAtivos++;
       if ((it.vendas || 0) === 0) semVendasAtivos++;
       if (calc.base > 0) { somaTicket += calc.base; countTicket++; }
+
+      // Custo médio do ML (% do preço): quanto comissão + frete pesam.
+      if (calc.base > 0 && (it.comissao != null || it.frete != null)) {
+        somaCustoMLpct += (((it.comissao || 0) + (it.frete || 0)) / calc.base) * 100;
+        countCustoMLpct++;
+      }
+
+      // Desempenho por margem (só faz sentido com custo preenchido).
       if (it.custoProduto != null && calc.margem != null) {
         somaMargem += calc.margem;
         countMargem++;
+        if (calc.lucro != null) somaLucro += calc.lucro;
         if (calc.margem < 0) prejuizo++;
-        else if (calc.margem < 10) margemBaixa++;
+        else if (calc.margem < LIMIAR) baixoDesempenho++;
+        else altoDesempenho++;
       }
     }
   }
 
   const margemMedia = countMargem ? somaMargem / countMargem : null;
+  const lucroMedio = countMargem ? somaLucro / countMargem : null;
   const ticketMedio = countTicket ? somaTicket / countTicket : 0;
-  const pctSaudaveis = allItems.length ? (semProblema / allItems.length) * 100 : 0;
-  const coberturaCusto = allItems.length ? (comCusto / allItems.length) * 100 : 0;
+  const custoMLMedioPct = countCustoMLpct ? somaCustoMLpct / countCustoMLpct : null;
 
   // ===== Insights inteligentes (só mostra o que tiver ocorrência) =====
   const insights = [];
-  if (semEstoqueAtivos > 0)
-    insights.push({ color: "danger", icon: "box-seam", titulo: `${semEstoqueAtivos} anúncio(s) ativos sem estoque`, texto: "Reabasteça para não perder posição no ranking do Mercado Livre.", link: "/?sort=estoque&dir=asc" });
+  if (estoqueBaixo > 0)
+    insights.push({ color: "danger", icon: "box-seam", titulo: `${estoqueBaixo} anúncio(s) ativos com estoque baixo`, texto: "Até 5 unidades. Reabasteça para não perder posição no ranking do Mercado Livre.", link: "/?filter=estoque_baixo" });
   if (prejuizo > 0)
-    insights.push({ color: "danger", icon: "graph-down-arrow", titulo: `${prejuizo} anúncio(s) no prejuízo`, texto: "Margem negativa — revise preço, custo do produto ou frete.", link: "/?sort=margem&dir=asc" });
-  if (margemBaixa > 0)
-    insights.push({ color: "warning", icon: "exclamation-triangle", titulo: `${margemBaixa} anúncio(s) com margem baixa`, texto: "Margem abaixo de 10%. Considere reajustar o preço.", link: "/?sort=margem&dir=asc" });
+    insights.push({ color: "danger", icon: "graph-down-arrow", titulo: `${prejuizo} anúncio(s) no prejuízo`, texto: "Margem negativa — revise preço, custo do produto ou frete.", link: "/?filter=prejuizo" });
+  if (baixoDesempenho > 0)
+    insights.push({ color: "warning", icon: "exclamation-triangle", titulo: `${baixoDesempenho} anúncio(s) com baixo desempenho`, texto: "Margem abaixo de 8%. Considere reajustar o preço.", link: "/?filter=baixo" });
   if (semCustoAtivos > 0)
-    insights.push({ color: "secondary", icon: "tag", titulo: `${semCustoAtivos} anúncio(s) ativos sem custo preenchido`, texto: "Preencha o custo na coluna 'Custo' para calcular a margem real.", link: "/?sort=custoProduto&dir=asc" });
+    insights.push({ color: "secondary", icon: "tag", titulo: `${semCustoAtivos} anúncio(s) ativos sem custo preenchido`, texto: "Preencha o custo na coluna 'Custo' para calcular a margem real.", link: "/?filter=sem_custo" });
   if (semVendasAtivos > 0)
     insights.push({ color: "secondary", icon: "cart-x", titulo: `${semVendasAtivos} anúncio(s) ativos sem nenhuma venda`, texto: "Revise título, fotos e preço para destravar as vendas.", link: "/?sort=vendas&dir=asc" });
   if (freteSubiu > 0)
@@ -126,18 +136,25 @@ export async function getDashboardData(userId) {
   return {
     ultimosAnuncios,
     insights,
-    margemMedia,
-    ticketMedio,
-    pctSaudaveis,
-    coberturaCusto,
+    // KPIs de desempenho (contagens clicáveis)
+    prejuizo,
+    altoDesempenho,
+    baixoDesempenho,
+    catalogo,
+    estoqueBaixo,
+    fullEstoqueBaixo,
+    semCustoAtivos,
     comCusto,
     countMargem,
-    prejuizo,
-    semEstoqueAtivos,
+    // KPIs financeiros (valores)
+    ticketMedio,
+    custoMLMedioPct,
+    lucroMedio,
+    margemMedia,
+    // Demais dados do dashboard
     total,
     comFrete,
     full,
-    catalogo,
     fretesMaisCaros,
     fretesMudaram,
     deltaTotal,
