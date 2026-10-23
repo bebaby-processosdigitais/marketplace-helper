@@ -22,7 +22,7 @@
   }
 %>
 
-<div class="container-fluid py-3 px-md-4">
+<div class="container-fluid py-3 px-md-4" id="itemsWrap" data-view="table">
 
   <!-- Barra de acoes -->
   <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
@@ -62,6 +62,16 @@
     <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#cepModal">
       <i class="bi bi-geo-alt"></i> CEP: <%= zipCode %>
     </button>
+
+    <!-- Alternador de visualização (somente desktop; no mobile é sempre cards) -->
+    <div class="btn-group d-none d-lg-inline-flex" role="group" aria-label="Modo de exibição">
+      <button type="button" id="viewBtnTable" class="btn btn-outline-secondary" title="Visualizar como planilha">
+        <i class="bi bi-table"></i> Planilha
+      </button>
+      <button type="button" id="viewBtnCards" class="btn btn-outline-secondary" title="Visualizar como cards">
+        <i class="bi bi-grid-3x3-gap"></i> Cards
+      </button>
+    </div>
   </div>
 
   <!-- Progresso do sync -->
@@ -91,8 +101,8 @@
     </small>
   </div>
 
-  <!-- Tabela (desktop) -->
-  <div class="table-responsive table-sticky shadow-sm rounded d-none d-lg-block">
+  <!-- Tabela (planilha) -->
+  <div class="table-responsive table-sticky shadow-sm rounded view-pane view-pane-table">
     <table class="table table-hover table-sm align-middle bg-white mb-0">
       <thead>
         <tr>
@@ -191,8 +201,8 @@
     </table>
   </div>
 
-  <!-- Cards (mobile / tablet) -->
-  <div class="d-lg-none">
+  <!-- Cards (mobile / tablet / desktop no modo cards) -->
+  <div class="view-pane view-pane-cards">
     <%
       function msort(c, d) {
         var u = "/?sort=" + c + "&dir=" + d;
@@ -220,6 +230,7 @@
       </div>
     <% } %>
 
+    <div class="cards-grid">
     <% items.forEach(function(it) { %>
       <div class="card shadow-sm mb-2">
         <div class="card-body p-2">
@@ -253,6 +264,7 @@
         </div>
       </div>
     <% }); %>
+    </div>
   </div>
 
   <!-- Paginacao -->
@@ -315,4 +327,46 @@
   </div>
 </div>
 
+<script>
+// Alternador de visualização (planilha x cards) — somente desktop.
+(function () {
+  var wrap = document.getElementById("itemsWrap");
+  if (!wrap) return;
+  var btnT = document.getElementById("viewBtnTable");
+  var btnC = document.getElementById("viewBtnCards");
+
+  // Copia o estado dos checkboxes de um painel para o outro (por MLB),
+  // para não "perder" a seleção ao trocar de visualização.
+  function mirrorChecks(fromSel, toSel) {
+    var state = {};
+    document.querySelectorAll(fromSel + " .row-check").forEach(function (c) {
+      state[c.value] = c.checked;
+    });
+    document.querySelectorAll(toSel + " .row-check").forEach(function (c) {
+      if (c.value in state) c.checked = state[c.value];
+    });
+  }
+
+  function apply(mode, mirror) {
+    var prev = wrap.getAttribute("data-view");
+    if (mirror && prev && prev !== mode) {
+      if (mode === "cards") mirrorChecks(".view-pane-table", ".view-pane-cards");
+      else mirrorChecks(".view-pane-cards", ".view-pane-table");
+    }
+    wrap.setAttribute("data-view", mode);
+    if (btnT) btnT.classList.toggle("active", mode === "table");
+    if (btnC) btnC.classList.toggle("active", mode === "cards");
+    try { localStorage.setItem("itemsView", mode); } catch (e) {}
+    // Recalcula contagem/visibilidade do botão de "Atualizar seleção".
+    if (typeof window.mhSyncSelectionUI === "function") window.mhSyncSelectionUI();
+  }
+
+  var saved = "table";
+  try { saved = localStorage.getItem("itemsView") || "table"; } catch (e) {}
+  apply(saved === "cards" ? "cards" : "table", false);
+
+  if (btnT) btnT.addEventListener("click", function () { apply("table", true); });
+  if (btnC) btnC.addEventListener("click", function () { apply("cards", true); });
+})();
+</script>
 <%- include('partials/footer') %>

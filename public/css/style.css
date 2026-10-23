@@ -421,6 +421,39 @@ table a {
   letter-spacing: 0.02em;
 }
 
+/* ===== Alternador de visualização (planilha x cards) ===== */
+/* Padrão (mobile, < 992px): sempre cards. A planilha fica oculta e o
+   botão alternador nem aparece (d-none no HTML). */
+.view-pane-table { display: none; }
+.view-pane-cards { display: block; }
+
+/* Desktop (>= 992px): respeita o modo escolhido em #itemsWrap[data-view]. */
+@media (min-width: 992px) {
+  [data-view="table"] .view-pane-table { display: block; }
+  [data-view="table"] .view-pane-cards { display: none; }
+  [data-view="cards"] .view-pane-table { display: none; }
+  [data-view="cards"] .view-pane-cards { display: block; }
+
+  /* No desktop, os cards viram uma grade responsiva (não esticam). */
+  [data-view="cards"] .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+  }
+  [data-view="cards"] .cards-grid .card { margin-bottom: 0 !important; }
+
+  /* No modo cards, o seletor de ordenação (originalmente mobile) aparece. */
+  [data-view="cards"] .view-pane-cards > .mb-2 { max-width: 320px; }
+}
+
+/* Botão ativo do alternador */
+.btn-group .btn.active {
+  background: var(--mh-primary) !important;
+  border-color: var(--mh-primary) !important;
+  color: #fff !important;
+}
+
 /* ===== Calculadora de frete: célula destacada ===== */
 .fc-hit {
   background: var(--mh-primary) !important;

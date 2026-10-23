@@ -133,9 +133,14 @@
     });
   }
 
-  rowChecks().forEach((c) =>
-    c.addEventListener("change", updateSelectionUI)
-  );
+  // Anexa o listener a TODOS os checkboxes (inclusive os do painel oculto),
+  // pois o modo de exibição pode trocar entre planilha e cards no desktop.
+  document
+    .querySelectorAll(".row-check")
+    .forEach((c) => c.addEventListener("change", updateSelectionUI));
+
+  // Exposto para o alternador de visualização recalcular a seleção ao trocar.
+  window.mhSyncSelectionUI = updateSelectionUI;
 
   if (btnSel) {
     btnSel.addEventListener("click", () => {
