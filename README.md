@@ -52,8 +52,8 @@ O **Marketplace Helper** resolve esse problema reunindo, para cada anúncio:
 - impostos (parametrizados pelo vendedor),
 
 e derivando **lucro líquido** e **margem**. Sobre esses dados, a aplicação constrói um painel com
-indicadores-chave (KPIs), *insights* acionáveis, um simulador de precificação e exportação para
-Excel.
+indicadores-chave (KPIs) **clicáveis**, *insights* acionáveis, um simulador de precificação, uma
+**calculadora de frete** (cubagem) e exportação para Excel.
 
 ---
 
@@ -127,7 +127,8 @@ dashboard ML/
 │   └── dev.db                 # Banco SQLite (NÃO versionado)
 ├── public/
 │   ├── css/style.css          # Tema (design system) da aplicação
-│   └── js/app.js              # JS do cliente (sync, seleção, custos, olho de senha)
+│   ├── js/app.js              # JS do cliente (sync, seleção, custos, olho de senha)
+│   └── js/frete-calc.js       # Calculadora de frete (cubagem + tabela do ML, cliente-lado)
 ├── src/
 │   ├── config/
 │   │   ├── env.js             # Carrega e valida variáveis de ambiente
@@ -158,7 +159,7 @@ dashboard ML/
 | `mlAuth.js` | Credenciais do app ML, fluxo OAuth, *tokens*, criptografia desses dados |
 | `mlApi.js` | Chamadas à API do Mercado Livre (itens, preços, frete, comissão, visitas, categoria) |
 | `syncService.js` | Orquestração da sincronização e *upsert* dos anúncios; estado de progresso |
-| `itemService.js` | Listagem paginada/ordenada/filtrada dos anúncios |
+| `itemService.js` | Listagem paginada/ordenada dos anúncios e **filtros rápidos** dos KPIs (`?filter=`) |
 | `calcService.js` | Cálculo de lucro/margem (`computeProfit`) e saúde do anúncio (`computeHealth`) |
 | `dashboardService.js` | Agregações, KPIs e *insights* do painel |
 | `productService.js` | Agrupamento por SKU e preenchimento de custo em lote |
@@ -264,20 +265,41 @@ vendedor (tela *Produtos*, por SKU).
 **Saúde do anúncio** (`computeHealth`) — avaliada em ordem, exibindo o primeiro estado aplicável:
 
 `Inativo` (status ≠ ativo) → `Sem estoque` (estoque ≤ 0) → `Preencher custo` (custo ausente) →
-`Prejuízo` (margem < 0) → `Margem baixa` (margem < 10%) → `Saudável`.
+`Prejuízo` (margem < 0) → `Margem baixa` (margem < 8%) → `Saudável`.
+
+O limiar de **8%** separa, em toda a aplicação, o **alto desempenho** (margem ≥ 8%) do **baixo
+desempenho** (0% ≤ margem < 8%).
 
 ---
 
 ## 9. Funcionalidades por módulo
 
-- **Anúncios** (`/`): tabela densa (desktop) com busca (MLB/título/SKU), ordenação por coluna e
-  **cabeçalho fixo**; no mobile, cada anúncio vira um **card** legível. Permite **seleção** para
-  sincronizar um subconjunto e **exportar para Excel**.
+- **Dashboard** (`/` — **página principal**; também em `/dashboard`): é a tela de entrada da
+  aplicação e o destino do logo. Reúne **KPIs clicáveis** organizados em três grupos, em que cada
+  cartão abre a lista de anúncios já filtrada:
+  - *Desempenho*: nº **no prejuízo**, **baixo desempenho** (0–8%), **alto desempenho** (≥ 8%) e
+    **no catálogo**;
+  - *Estoque & cadastro*: **estoque baixo** (≤ 5, ativos), **Full com estoque baixo**, **sem custo**
+    e **ticket médio**;
+  - *Saúde financeira*: **custo médio do ML** (comissão + frete sobre o preço, %), **lucro líquido
+    médio**, **margem média** e **cobertura de custo**.
+
+  Traz ainda a seção de **insights** acionáveis (também com *deep-link* para a lista filtrada),
+  **últimos anúncios** em cards com cálculo e saúde, distribuição por tipo/Full/Catálogo e análises
+  de frete.
+- **Anúncios** (`/anuncios`): tabela densa com busca (MLB/título/SKU), ordenação por coluna e
+  **cabeçalho fixo**. No desktop há um **alternador de visualização** entre *planilha* e *cards*
+  (os cards em grade, mesmo layout do mobile; a escolha é lembrada no navegador); no mobile é sempre
+  em cards. Aceita **filtros rápidos** vindos dos KPIs do dashboard (`?filter=`), com *chip* do
+  filtro ativo e botão de limpar. Permite **seleção** para sincronizar um subconjunto e **exportar
+  para Excel**. O selo de **Full** aparece como um *badge* verde com raio.
 - **Produtos** (`/produtos`): agrupa os anúncios por **SKU**. Preencher o custo de um SKU o aplica
   a **todos** os anúncios daquele produto. Busca por SKU, nome ou MLB.
-- **Dashboard** (`/dashboard`): seis KPIs (margem média, nº em prejuízo, % saudáveis, cobertura de
-  custo, ticket médio, sem estoque), seção de **insights** acionáveis, **últimos anúncios** em
-  cards com cálculo e saúde, distribuição por tipo/Full/Catálogo e análises de frete.
+- **Calculadora de Frete** (`/frete`): calcula a **cubagem** (peso volumétrico = L × A × C ÷ 6000),
+  usa o **maior** entre peso real e peso cubado e, com o preço de venda, consulta o **custo de
+  envio** na tabela oficial do Mercado Livre (MercadoLíder / reputação verde / sem reputação).
+  Mostra o resultado em tempo real e destaca a célula correspondente na tabela de referência. É um
+  cálculo **cliente-lado** (`public/js/frete-calc.js`), sem chamadas à API.
 - **Regras** (`/regras`): cadastro das alíquotas, com explicação do cálculo e um **exemplo
   dinâmico** usando os valores do próprio usuário.
 - **Simulador** (`/simulador`): a partir de um título e preço, prediz a categoria, calcula a
@@ -338,10 +360,12 @@ hospedada em qualquer serviço (Vercel, Netlify, GitHub Pages, etc.) sem o Node.
 
 | Método | Rota | Função |
 |---|---|---|
-| GET | `/` | Lista de anúncios |
-| GET | `/dashboard` | Painel de KPIs e insights |
+| GET | `/` | **Painel de KPIs e insights (página principal)** |
+| GET | `/dashboard` | Painel de KPIs e insights (alias de `/`) |
+| GET | `/anuncios` | Lista de anúncios (busca, ordenação, `?filter=`) |
 | GET | `/produtos` | Produtos agrupados por SKU |
 | POST | `/produtos/custo` | Define custo de um SKU (aplica a todos os anúncios) |
+| GET | `/frete` | Calculadora de frete (cubagem + tabela do ML) |
 | GET/POST | `/regras` | Regras de negócio (impostos/custos) |
 | GET/POST | `/simulador` | Simulador de anúncio |
 | GET | `/auth` · POST `/auth/credentials` · POST `/auth/code` | Autorização Mercado Livre |
@@ -491,6 +515,8 @@ Acesse **<http://localhost:8080>**.
 ## 18. Limitações conhecidas e trabalhos futuros
 
 - **Recuperação de senha por e-mail:** interface pronta; falta integrar um provedor de e-mail.
+- **Status de vencedor no catálogo:** o KPI "No catálogo" conta anúncios **no** catálogo; distinguir
+  quem está **ganhando** o *buy box* exigiria uma chamada `price_to_win` por item na sincronização.
 - **Usuários convidados (equipe):** planejado — permitir que a conta dona conceda acesso de
   leitura a usuários adicionais compartilhando os mesmos dados.
 - **Agendamento sempre ativo:** o cron depende do servidor em execução; em produção, recomenda-se
