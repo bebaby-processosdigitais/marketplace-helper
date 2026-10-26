@@ -81,18 +81,18 @@
         </div>
       <% } else { %>
         <div class="table-responsive">
-          <table class="table table-sm table-hover mb-0 align-middle">
+          <table class="table table-sm table-hover mb-0 align-middle table-stack">
             <thead class="table-light">
               <tr><th>MLB</th><th>Título</th><th class="text-end">Cobrado</th><th class="text-end">Real</th><th class="text-end">Δ</th></tr>
             </thead>
             <tbody>
               <% divergentesTop.forEach(function(d) { var up = d.delta > 0; %>
                 <tr>
-                  <td><small><%= d.mlb %></small></td>
-                  <td class="text-truncate" style="max-width: 240px;" title="<%= d.titulo %>"><%= d.titulo %></td>
-                  <td class="text-end text-muted">R$ <%= d.freteCobrado.toFixed(2) %></td>
-                  <td class="text-end fw-semibold">R$ <%= d.freteReal.toFixed(2) %></td>
-                  <td class="text-end">
+                  <td data-label="MLB"><small><%= d.mlb %></small></td>
+                  <td data-label="Título" class="text-truncate" style="max-width: 240px;" title="<%= d.titulo %>"><%= d.titulo %></td>
+                  <td data-label="Cobrado" class="text-end text-muted">R$ <%= d.freteCobrado.toFixed(2) %></td>
+                  <td data-label="Real" class="text-end fw-semibold">R$ <%= d.freteReal.toFixed(2) %></td>
+                  <td data-label="Δ" class="text-end">
                     <span class="badge <%= up ? 'text-bg-danger' : 'text-bg-success' %>" title="<%= up ? 'Real acima do cobrado (subdeclarado)' : 'Real abaixo do cobrado (superdeclarado)' %>">
                       <i class="bi bi-arrow-<%= up ? 'up' : 'down' %>"></i> R$ <%= Math.abs(d.delta).toFixed(2) %>
                     </span>
@@ -200,7 +200,7 @@
           <i class="bi bi-fire text-danger"></i> Fretes mais caros (Top 10)
         </div>
         <div class="table-responsive">
-          <table class="table table-sm table-hover mb-0 align-middle">
+          <table class="table table-sm table-hover mb-0 align-middle table-stack">
             <thead class="table-light">
               <tr><th>MLB</th><th>Título</th><th class="text-end">Frete</th></tr>
             </thead>
@@ -210,9 +210,9 @@
               <% } %>
               <% fretesMaisCaros.forEach(function(it) { %>
                 <tr>
-                  <td><small><%= it.mlb %></small></td>
-                  <td class="text-truncate" style="max-width: 260px;" title="<%= it.titulo %>"><%= it.titulo %></td>
-                  <td class="text-end fw-semibold text-danger">R$ <%= it.frete.toFixed(2) %></td>
+                  <td data-label="MLB"><small><%= it.mlb %></small></td>
+                  <td data-label="Título" class="text-truncate" style="max-width: 260px;" title="<%= it.titulo %>"><%= it.titulo %></td>
+                  <td data-label="Frete" class="text-end fw-semibold text-danger">R$ <%= it.frete.toFixed(2) %></td>
                 </tr>
               <% }); %>
             </tbody>
@@ -233,7 +233,7 @@
           <% } %>
         </div>
         <div class="table-responsive">
-          <table class="table table-sm table-hover mb-0 align-middle">
+          <table class="table table-sm table-hover mb-0 align-middle table-stack">
             <thead class="table-light">
               <tr><th>MLB</th><th>Título</th><th class="text-end">Antes</th><th class="text-end">Agora</th><th class="text-end">Δ</th></tr>
             </thead>
@@ -244,11 +244,11 @@
               <% fretesMudaram.forEach(function(it) { %>
                 <% var up = it.frete > it.freteAnterior; %>
                 <tr>
-                  <td><small><%= it.mlb %></small></td>
-                  <td class="text-truncate" style="max-width: 200px;" title="<%= it.titulo %>"><%= it.titulo %></td>
-                  <td class="text-end text-muted">R$ <%= it.freteAnterior.toFixed(2) %></td>
-                  <td class="text-end fw-semibold">R$ <%= it.frete.toFixed(2) %></td>
-                  <td class="text-end">
+                  <td data-label="MLB"><small><%= it.mlb %></small></td>
+                  <td data-label="Título" class="text-truncate" style="max-width: 200px;" title="<%= it.titulo %>"><%= it.titulo %></td>
+                  <td data-label="Antes" class="text-end text-muted">R$ <%= it.freteAnterior.toFixed(2) %></td>
+                  <td data-label="Agora" class="text-end fw-semibold">R$ <%= it.frete.toFixed(2) %></td>
+                  <td data-label="Δ" class="text-end">
                     <span class="badge <%= up ? 'text-bg-danger' : 'text-bg-success' %>">
                       <i class="bi bi-arrow-<%= up ? 'up' : 'down' %>"></i>
                       <%= Math.abs(it.frete - it.freteAnterior).toFixed(2) %>

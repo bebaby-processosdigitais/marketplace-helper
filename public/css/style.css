@@ -816,6 +816,51 @@ table a {
   transform: translateX(2px);
 }
 
+/* ===== Tabela que vira cards empilhados no mobile (.table-stack) ===== */
+@media (max-width: 991.98px) {
+  .table-stack thead { display: none; }
+  .table-stack,
+  .table-stack tbody,
+  .table-stack tr,
+  .table-stack td { display: block; width: 100%; }
+
+  .table-stack tr {
+    border: 1px solid var(--mh-border);
+    border-radius: var(--mh-radius-sm);
+    padding: 0.35rem 0.7rem;
+    margin: 0.5rem 0.6rem;
+  }
+
+  .table-stack td {
+    border: 0 !important;
+    padding: 0.2rem 0 !important;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    text-align: right !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    max-width: none !important;
+  }
+
+  /* Rótulo (vem do atributo data-label) à esquerda de cada valor */
+  .table-stack td::before {
+    content: attr(data-label);
+    color: var(--mh-muted);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-align: left;
+    flex: 0 0 auto;
+  }
+
+  /* Linha de estado vazio (colspan) ocupa o card inteiro, centralizada */
+  .table-stack td[colspan] { display: block; text-align: center !important; }
+  .table-stack td[colspan]::before { content: none; }
+}
+
 /* ===== Insights inteligentes ===== */
 .insight-item {
   transition: background 0.15s;
