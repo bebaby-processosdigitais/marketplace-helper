@@ -196,6 +196,29 @@
   });
 })();
 
+// ============ Menu lateral: recolher (desktop) / abrir (mobile) ============
+(function () {
+  const burger = document.getElementById("appBurger");
+  if (!burger) return;
+  const overlay = document.getElementById("appOverlay");
+  const isMobile = () => window.matchMedia("(max-width: 991.98px)").matches;
+
+  burger.addEventListener("click", function () {
+    if (isMobile()) {
+      document.body.classList.toggle("sidebar-mobile-open");
+    } else {
+      document.body.classList.remove("sidebar-mobile-open");
+      const collapsed = document.body.classList.toggle("sidebar-collapsed");
+      try { localStorage.setItem("sidebarCollapsed", collapsed ? "1" : "0"); } catch (e) {}
+    }
+  });
+
+  function closeMobile() { document.body.classList.remove("sidebar-mobile-open"); }
+  if (overlay) overlay.addEventListener("click", closeMobile);
+  // Ao voltar para desktop, garante que o estado mobile não "trave" o menu.
+  window.addEventListener("resize", function () { if (!isMobile()) closeMobile(); });
+})();
+
 // ============ Olho mágico: mostrar/ocultar senha ============
 (function () {
   document.querySelectorAll('input[type="password"]').forEach(function (input) {

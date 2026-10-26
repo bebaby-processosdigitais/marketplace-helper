@@ -34,6 +34,169 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.01em;
 }
 
+/* ===== Layout com menu lateral ===== */
+:root {
+  --app-sb-w: 244px;
+  --app-tb-h: 56px;
+}
+
+.app-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--app-tb-h);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  background: var(--mh-surface);
+  border-bottom: 1px solid var(--mh-border);
+  z-index: 1040;
+}
+
+.app-burger {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--mh-border);
+  background: var(--mh-surface);
+  color: var(--mh-text);
+  border-radius: var(--mh-radius-sm);
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.app-burger:hover {
+  background: var(--mh-primary-soft);
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: var(--mh-text);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+.app-brand i {
+  color: var(--mh-primary);
+  font-size: 1.1rem;
+}
+
+.app-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-sidebar {
+  position: fixed;
+  top: var(--app-tb-h);
+  left: 0;
+  bottom: 0;
+  width: var(--app-sb-w);
+  background: var(--mh-surface);
+  border-right: 1px solid var(--mh-border);
+  overflow-y: auto;
+  z-index: 1035;
+  padding: 0.6rem 0;
+  transition: transform 0.2s ease;
+}
+
+.app-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.9rem;
+  margin: 0 0.5rem;
+  border-radius: var(--mh-radius-sm);
+  color: var(--mh-muted);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+
+.app-nav a i {
+  font-size: 1.05rem;
+  width: 1.3rem;
+  text-align: center;
+}
+
+.app-nav a:hover {
+  background: var(--mh-primary-soft);
+  color: var(--mh-text);
+}
+
+.app-nav a.active {
+  background: var(--mh-primary-soft);
+  color: var(--mh-primary);
+  font-weight: 600;
+}
+
+.app-main {
+  margin-top: var(--app-tb-h);
+  margin-left: var(--app-sb-w);
+  min-height: calc(100vh - var(--app-tb-h));
+  transition: margin-left 0.2s ease;
+}
+
+.app-overlay {
+  position: fixed;
+  inset: var(--app-tb-h) 0 0 0;
+  background: rgba(15, 23, 41, 0.4);
+  z-index: 1034;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+
+/* Recolhido (desktop): some o menu e o conteúdo ocupa tudo */
+body.sidebar-collapsed .app-sidebar {
+  transform: translateX(-100%);
+}
+
+body.sidebar-collapsed .app-main {
+  margin-left: 0;
+}
+
+/* Mobile/tablet: o menu vira off-canvas (escondido por padrão) */
+@media (max-width: 991.98px) {
+  .app-main {
+    margin-left: 0;
+  }
+  .app-sidebar {
+    transform: translateX(-100%);
+    box-shadow: 0 0 24px rgba(15, 23, 41, 0.18);
+  }
+  body.sidebar-mobile-open .app-sidebar {
+    transform: translateX(0);
+  }
+  body.sidebar-mobile-open .app-overlay {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Em telas muito estreitas, esconde o nome da marca para dar espaço */
+@media (max-width: 400px) {
+  .app-brand-text {
+    display: none;
+  }
+}
+
 /* ===== Navbar ===== */
 .ml-navbar {
   background: var(--mh-surface) !important;

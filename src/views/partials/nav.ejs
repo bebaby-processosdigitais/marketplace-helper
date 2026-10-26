@@ -1,79 +1,72 @@
-<nav class="navbar navbar-expand-lg navbar-light ml-navbar sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="/">
-      <i class="bi bi-box-seam"></i> Marketplace Helper
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link <%= typeof active !== 'undefined' && active === 'dashboard' ? 'active' : '' %>" href="/">
-            <i class="bi bi-speedometer2"></i> Dashboard
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= typeof active !== 'undefined' && active === 'items' ? 'active' : '' %>" href="/anuncios">
-            <i class="bi bi-list-ul"></i> Anúncios
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= typeof active !== 'undefined' && active === 'products' ? 'active' : '' %>" href="/produtos">
-            <i class="bi bi-box2"></i> Produtos
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= typeof active !== 'undefined' && active === 'rules' ? 'active' : '' %>" href="/regras">
-            <i class="bi bi-sliders"></i> Regras
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= typeof active !== 'undefined' && active === 'simulator' ? 'active' : '' %>" href="/simulador">
-            <i class="bi bi-calculator"></i> Simulador
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= typeof active !== 'undefined' && active === 'frete' ? 'active' : '' %>" href="/frete">
-            <i class="bi bi-truck"></i> Frete
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= typeof active !== 'undefined' && active === 'auth' ? 'active' : '' %>" href="/auth">
-            <i class="bi bi-shield-lock"></i> Autorização
-          </a>
-        </li>
-      </ul>
-      <div class="d-flex align-items-center gap-2 gap-lg-3">
-        <% if (typeof lastSyncAt !== 'undefined' && lastSyncAt) {
-             var ds = new Date(lastSyncAt);
-             var hojeAgora = new Date();
-             var mesmoDia = ds.toDateString() === hojeAgora.toDateString();
-             var hhmm = ds.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-             var txtSync = mesmoDia ? ('hoje ' + hhmm) : (ds.toLocaleDateString('pt-BR') + ' ' + hhmm);
-        %>
-          <span class="navbar-text small text-muted d-none d-md-inline" title="Última sincronização dos anúncios">
-            <i class="bi bi-arrow-repeat"></i> Atualizado: <%= txtSync %>
-          </span>
-        <% } %>
-        <% if (typeof authenticated !== 'undefined') { %>
-          <% if (authenticated) { %>
-            <span class="badge text-bg-success"><i class="bi bi-check-circle"></i> Conectado</span>
-          <% } else { %>
-            <span class="badge text-bg-warning"><i class="bi bi-exclamation-triangle"></i> Não autorizado</span>
-          <% } %>
-        <% } %>
-        <% if (typeof user !== 'undefined' && user) { %>
-          <a href="/conta" class="user-chip <%= typeof active !== 'undefined' && active === 'account' ? 'active' : '' %>" title="Minha conta">
-            <i class="bi bi-person-circle user-chip-icon"></i>
-            <span class="text-truncate" style="max-width: 130px;"><%= user.storeName %></span>
-            <i class="bi bi-chevron-right chev small"></i>
-          </a>
-          <a href="/logout" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-box-arrow-right"></i> Sair
-          </a>
-        <% } %>
-      </div>
-    </div>
+<%
+  // Marca que esta página usa o layout com menu lateral (o footer fecha o <main>).
+  locals.hasSidebar = true;
+  function navActive(key) {
+    return (typeof active !== 'undefined' && active === key) ? 'active' : '';
+  }
+%>
+<script>
+  // Aplica o estado recolhido salvo antes da pintura, evitando "pulo" do layout.
+  (function () {
+    try { if (localStorage.getItem('sidebarCollapsed') === '1') document.body.classList.add('sidebar-collapsed'); } catch (e) {}
+  })();
+</script>
+
+<!-- Barra superior -->
+<header class="app-topbar">
+  <button class="app-burger" id="appBurger" type="button" aria-label="Mostrar/ocultar menu" title="Mostrar/ocultar menu">
+    <i class="bi bi-list"></i>
+  </button>
+  <a class="app-brand" href="/">
+    <i class="bi bi-box-seam"></i> <span class="app-brand-text">Marketplace Helper</span>
+  </a>
+
+  <div class="app-topbar-right ms-auto">
+    <% if (typeof lastSyncAt !== 'undefined' && lastSyncAt) {
+         var ds = new Date(lastSyncAt);
+         var hojeAgora = new Date();
+         var mesmoDia = ds.toDateString() === hojeAgora.toDateString();
+         var hhmm = ds.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+         var txtSync = mesmoDia ? ('hoje ' + hhmm) : (ds.toLocaleDateString('pt-BR') + ' ' + hhmm);
+    %>
+      <span class="small text-muted d-none d-lg-inline" title="Última sincronização dos anúncios">
+        <i class="bi bi-arrow-repeat"></i> Atualizado: <%= txtSync %>
+      </span>
+    <% } %>
+    <% if (typeof authenticated !== 'undefined') { %>
+      <% if (authenticated) { %>
+        <span class="badge text-bg-success d-none d-sm-inline-flex align-items-center"><i class="bi bi-check-circle"></i>&nbsp;Conectado</span>
+      <% } else { %>
+        <span class="badge text-bg-warning d-none d-sm-inline-flex align-items-center"><i class="bi bi-exclamation-triangle"></i>&nbsp;Não autorizado</span>
+      <% } %>
+    <% } %>
+    <% if (typeof user !== 'undefined' && user) { %>
+      <a href="/conta" class="user-chip <%= navActive('account') %>" title="Minha conta">
+        <i class="bi bi-person-circle user-chip-icon"></i>
+        <span class="text-truncate d-none d-sm-inline" style="max-width: 130px;"><%= user.storeName %></span>
+        <i class="bi bi-chevron-right chev small d-none d-sm-inline"></i>
+      </a>
+      <a href="/logout" class="btn btn-sm btn-outline-secondary" title="Sair">
+        <i class="bi bi-box-arrow-right"></i><span class="d-none d-md-inline">&nbsp;Sair</span>
+      </a>
+    <% } %>
   </div>
-</nav>
+</header>
+
+<!-- Menu lateral -->
+<aside class="app-sidebar" id="appSidebar">
+  <nav class="app-nav">
+    <a class="<%= navActive('dashboard') %>" href="/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a class="<%= navActive('items') %>" href="/anuncios"><i class="bi bi-list-ul"></i> Anúncios</a>
+    <a class="<%= navActive('products') %>" href="/produtos"><i class="bi bi-box2"></i> Produtos</a>
+    <a class="<%= navActive('frete') %>" href="/frete"><i class="bi bi-truck"></i> Frete</a>
+    <a class="<%= navActive('rules') %>" href="/regras"><i class="bi bi-sliders"></i> Regras</a>
+    <a class="<%= navActive('simulator') %>" href="/simulador"><i class="bi bi-calculator"></i> Simulador</a>
+    <a class="<%= navActive('auth') %>" href="/auth"><i class="bi bi-shield-lock"></i> Autorização</a>
+  </nav>
+</aside>
+
+<!-- Fundo escuro no mobile (fecha o menu ao clicar) -->
+<div class="app-overlay" id="appOverlay"></div>
+
+<main class="app-main">
