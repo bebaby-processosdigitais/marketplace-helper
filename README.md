@@ -53,7 +53,8 @@ O **Marketplace Helper** resolve esse problema reunindo, para cada anúncio:
 
 e derivando **lucro líquido** e **margem**. Sobre esses dados, a aplicação constrói um painel com
 indicadores-chave (KPIs) **clicáveis**, *insights* acionáveis, um simulador de precificação, uma
-**calculadora de frete** (cubagem) e exportação para Excel.
+**calculadora de frete** (cubagem), a detecção de **frete divergente** (real × cobrado) a partir
+das medidas do produto e exportação para Excel.
 
 ---
 
@@ -127,8 +128,9 @@ dashboard ML/
 │   └── dev.db                 # Banco SQLite (NÃO versionado)
 ├── public/
 │   ├── css/style.css          # Tema (design system) da aplicação
-│   ├── js/app.js              # JS do cliente (sync, seleção, custos, olho de senha)
-│   └── js/frete-calc.js       # Calculadora de frete (cubagem + tabela do ML, cliente-lado)
+│   ├── js/app.js              # JS do cliente (sync, seleção, custos/medidas, menu lateral)
+│   ├── js/frete-calc.js       # Calculadora de frete (cubagem + tabela do ML, cliente-lado)
+│   └── js/medir.js            # Simulação da medição (câmera + balança) da tela /medir
 ├── src/
 │   ├── config/
 │   │   ├── env.js             # Carrega e valida variáveis de ambiente
@@ -161,8 +163,9 @@ dashboard ML/
 | `syncService.js` | Orquestração da sincronização e *upsert* dos anúncios; estado de progresso |
 | `itemService.js` | Listagem paginada/ordenada dos anúncios e **filtros rápidos** dos KPIs (`?filter=`) |
 | `calcService.js` | Cálculo de lucro/margem (`computeProfit`) e saúde do anúncio (`computeHealth`) |
-| `dashboardService.js` | Agregações, KPIs e *insights* do painel |
-| `productService.js` | Agrupamento por SKU e preenchimento de custo em lote |
+| `dashboardService.js` | Agregações, KPIs, *insights* e lista de **frete divergente** do painel |
+| `productService.js` | Agrupamento por SKU; custo e **medidas** (L/A/C/peso) em lote; comparação frete cobrado × real |
+| `freteTable.js` | Tabela de frete do ML no servidor; `freteEstimado` (cubagem) e `avaliaDivergencia` |
 | `rulesService.js` | Regras de negócio (ICMS, IPI, DIFAL, custo operacional) |
 | `simulatorService.js` | Simulação de anúncio (categoria, comissão, frete, retorno) |
 | `exportService.js` | Geração da planilha Excel |
@@ -188,7 +191,7 @@ User 1───1 MlAccount          (credenciais do app ML + tokens OAuth, cifra
 | **MlAccount** | `appId`, `appSecret`, `redirectUri`, `accessToken`, `refreshToken`, `mlUserId` | `appSecret` e *tokens* **cifrados** (AES-256-GCM) |
 | **Settings** | `zipCode`, `lastSyncAt` | CEP usado no cálculo de frete |
 | **BusinessRule** | `icms`, `ipi`, `difal`, `custoOperacional` | Percentuais (%) |
-| **Item** | `mlb`, `sku`, `titulo`, `thumbnail`, `permalink`, `custoProduto`, `precoDe`, `precoPor`, `frete`, `comissao`, `comissaoPct`, `visitas`, `vendas`, `estoque`, `status`, `full`, `catalogo`, categorias | Único por `(userId, mlb)` |
+| **Item** | `mlb`, `sku`, `titulo`, `thumbnail`, `permalink`, `custoProduto`, `largura`, `altura`, `comprimento`, `pesoReal`, `precoDe`, `precoPor`, `frete`, `comissao`, `comissaoPct`, `visitas`, `vendas`, `estoque`, `status`, `full`, `catalogo`, categorias | Único por `(userId, mlb)`. Medidas (L/A/C/peso) são aplicadas por SKU |
 | **ShippingHistory** | `mlb`, `cost`, `capturedAt` | Permite detectar mudanças de frete |
 
 ---
@@ -270,6 +273,19 @@ vendedor (tela *Produtos*, por SKU).
 O limiar de **8%** separa, em toda a aplicação, o **alto desempenho** (margem ≥ 8%) do **baixo
 desempenho** (0% ≤ margem < 8%).
 
+**Frete real × cobrado** (`freteTable.js`) — com as medidas do produto (largura, altura,
+comprimento e peso, por SKU), estima-se o **frete real** pela tabela de cubagem do Mercado Livre:
+
+```
+cubagem      = (largura × altura × comprimento em cm) / 6000
+considerado  = maior(peso real, cubagem)
+frete real   = tabela_ML(considerado, preço de venda)   (coluna por faixa de preço)
+divergente   = |frete real − frete cobrado| ≥ R$ 2
+```
+
+O **frete cobrado** é o `Item.frete` vindo da API. Δ positivo = real acima do cobrado (dimensões
+**subdeclaradas** no ML, risco de cobrança extra); negativo = **superdeclaradas** (pagando a mais).
+
 ---
 
 ## 9. Funcionalidades por módulo
@@ -284,17 +300,24 @@ desempenho** (0% ≤ margem < 8%).
   - *Saúde financeira*: **custo médio do ML** (comissão + frete sobre o preço, %), **lucro líquido
     médio**, **margem média** e **cobertura de custo**.
 
-  Traz ainda a seção de **insights** acionáveis (também com *deep-link* para a lista filtrada),
-  **últimos anúncios** em cards com cálculo e saúde, distribuição por tipo/Full/Catálogo e análises
-  de frete.
+  Traz ainda uma seção **Frete divergente** (anúncios cujo frete real difere do cobrado), a seção de
+  **insights** acionáveis (também com *deep-link* para a lista filtrada), **últimos anúncios** em
+  cards com cálculo e saúde, distribuição por tipo/Full/Catálogo e análises de frete.
 - **Anúncios** (`/anuncios`): tabela densa com busca (MLB/título/SKU), ordenação por coluna e
   **cabeçalho fixo**. No desktop há um **alternador de visualização** entre *planilha* e *cards*
   (os cards em grade, mesmo layout do mobile; a escolha é lembrada no navegador); no mobile é sempre
   em cards. Aceita **filtros rápidos** vindos dos KPIs do dashboard (`?filter=`), com *chip* do
   filtro ativo e botão de limpar. Permite **seleção** para sincronizar um subconjunto e **exportar
   para Excel**. O selo de **Full** aparece como um *badge* verde com raio.
-- **Produtos** (`/produtos`): agrupa os anúncios por **SKU**. Preencher o custo de um SKU o aplica
-  a **todos** os anúncios daquele produto. Busca por SKU, nome ou MLB.
+- **Produtos** (`/produtos`): agrupa os anúncios por **SKU**. O **custo** e as **medidas**
+  (largura/altura/comprimento/peso) preenchidos aqui são aplicados a **todos** os anúncios daquele
+  SKU. Com as medidas, mostra o **frete cobrado × frete real** e um *badge* de divergência por
+  produto. Busca por SKU, nome ou MLB.
+- **Medição** (`/medir`): simulação do app com **câmera + balança Bluetooth**. A câmera "mede" as
+  dimensões, a balança "envia" o peso, o usuário informa o SKU e as medidas são salvas no produto —
+  já comparando o frete cobrado com o real. Como a web não tem sensor de profundidade nem a balança
+  física, a câmera e a balança são **simuladas** (valores editáveis), prontas para serem trocadas
+  pela leitura real no app móvel.
 - **Calculadora de Frete** (`/frete`): calcula a **cubagem** (peso volumétrico = L × A × C ÷ 6000),
   usa o **maior** entre peso real e peso cubado e, com o preço de venda, consulta o **custo de
   envio** na tabela oficial do Mercado Livre (MercadoLíder / reputação verde / sem reputação).
@@ -363,8 +386,10 @@ hospedada em qualquer serviço (Vercel, Netlify, GitHub Pages, etc.) sem o Node.
 | GET | `/` | **Painel de KPIs e insights (página principal)** |
 | GET | `/dashboard` | Painel de KPIs e insights (alias de `/`) |
 | GET | `/anuncios` | Lista de anúncios (busca, ordenação, `?filter=`) |
-| GET | `/produtos` | Produtos agrupados por SKU |
+| GET | `/produtos` | Produtos agrupados por SKU (custo, medidas, frete cobrado × real) |
 | POST | `/produtos/custo` | Define custo de um SKU (aplica a todos os anúncios) |
+| POST | `/produtos/medidas` | Define as medidas (L/A/C/peso) de um SKU e devolve a comparação de frete |
+| GET | `/medir` | Medição do produto (câmera + balança simuladas) |
 | GET | `/frete` | Calculadora de frete (cubagem + tabela do ML) |
 | GET/POST | `/regras` | Regras de negócio (impostos/custos) |
 | GET/POST | `/simulador` | Simulador de anúncio |
@@ -471,8 +496,9 @@ Acesse **<http://localhost:3333>**.
 3. Clique em **Autorizar no Mercado Livre**, faça login, autorize e **cole** a URL (ou o `code`)
    de retorno.
 4. Em **Anúncios**, clique em **Atualizar tudo** para importar o catálogo.
-5. Em **Produtos**, preencha os **custos** por SKU; em **Regras**, informe as **alíquotas**.
-6. Consulte o **Dashboard** para ver lucro, margem e *insights*.
+5. Em **Produtos**, preencha os **custos** e as **medidas** (L/A/C/peso) por SKU — ou use
+   **Medição** para capturar as medidas; em **Regras**, informe as **alíquotas**.
+6. Consulte o **Dashboard** para ver lucro, margem, *insights* e **frete divergente**.
 
 ### 15.7. (Opcional) Landing page
 
@@ -517,6 +543,10 @@ Acesse **<http://localhost:8080>**.
 - **Recuperação de senha por e-mail:** interface pronta; falta integrar um provedor de e-mail.
 - **Status de vencedor no catálogo:** o KPI "No catálogo" conta anúncios **no** catálogo; distinguir
   quem está **ganhando** o *buy box* exigiria uma chamada `price_to_win` por item na sincronização.
+- **Medição real (câmera + balança):** a tela `/medir` é hoje uma **simulação** — a web não tem
+  sensor de profundidade nem acesso à balança física. No app móvel, bastaria trocar os botões de
+  simulação pela medição real da câmera e pela leitura **Web Bluetooth** da balança; o cálculo de
+  frete real, o armazenamento por SKU e a detecção de divergência já estão prontos.
 - **Usuários convidados (equipe):** planejado — permitir que a conta dona conceda acesso de
   leitura a usuários adicionais compartilhando os mesmos dados.
 - **Agendamento sempre ativo:** o cron depende do servidor em execução; em produção, recomenda-se
