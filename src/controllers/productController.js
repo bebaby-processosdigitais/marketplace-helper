@@ -1,4 +1,4 @@
-import { listProducts, setCostForSku } from "../services/productService.js";
+import { listProducts, setCostForSku, setDimsForSku } from "../services/productService.js";
 import { getAuthStatus } from "../services/mlAuth.js";
 
 export async function showProducts(req, res) {
@@ -17,5 +17,12 @@ export async function saveProductCost(req, res) {
   const { sku, custo } = req.body;
   if (!sku) return res.status(400).json({ error: "SKU ausente." });
   const result = await setCostForSku(req.user.id, sku, custo);
+  res.json({ ok: true, ...result });
+}
+
+export async function saveProductDims(req, res) {
+  const { sku, largura, altura, comprimento, pesoReal } = req.body;
+  if (!sku) return res.status(400).json({ error: "SKU ausente." });
+  const result = await setDimsForSku(req.user.id, sku, { largura, altura, comprimento, pesoReal });
   res.json({ ok: true, ...result });
 }

@@ -1,0 +1,87 @@
+<% var active = 'medir'; %>
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+
+<div class="container py-4" style="max-width: 820px;">
+  <h3 class="mb-1"><i class="bi bi-rulers"></i> Medição de produto</h3>
+  <p class="text-muted mb-4">
+    Simulação do app com câmera + balança Bluetooth: a <strong>câmera</strong> mede largura, altura e
+    comprimento, a <strong>balança</strong> envia o peso, você informa o <strong>SKU</strong> e as
+    medidas são salvas no produto — já comparando o <strong>frete cobrado</strong> com o
+    <strong>frete real</strong>.
+  </p>
+
+  <div class="row g-3">
+    <!-- Câmera / scanner -->
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="fw-semibold mb-2"><i class="bi bi-camera text-primary"></i> Câmera</div>
+          <div class="med-scanner" id="medScanner">
+            <i class="bi bi-box med-box"></i>
+            <div class="med-scanline"></div>
+            <div class="med-status" id="medScanStatus">Pronto para medir</div>
+          </div>
+          <button class="btn btn-primary w-100 mt-3" id="btnMedir" type="button">
+            <i class="bi bi-camera"></i> Medir dimensões
+          </button>
+          <div class="row g-2 mt-2">
+            <div class="col-4">
+              <label class="form-label small text-muted mb-1">Largura</label>
+              <div class="input-group input-group-sm"><input id="medL" class="form-control text-end" inputmode="decimal" placeholder="0" /><span class="input-group-text">cm</span></div>
+            </div>
+            <div class="col-4">
+              <label class="form-label small text-muted mb-1">Altura</label>
+              <div class="input-group input-group-sm"><input id="medA" class="form-control text-end" inputmode="decimal" placeholder="0" /><span class="input-group-text">cm</span></div>
+            </div>
+            <div class="col-4">
+              <label class="form-label small text-muted mb-1">Compr.</label>
+              <div class="input-group input-group-sm"><input id="medC" class="form-control text-end" inputmode="decimal" placeholder="0" /><span class="input-group-text">cm</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Balança + SKU -->
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="fw-semibold mb-2"><i class="bi bi-bluetooth text-primary"></i> Balança</div>
+          <div class="med-scale" id="medScale">
+            <i class="bi bi-speedometer2"></i>
+            <div class="med-scale-value" id="medScaleValue">—</div>
+            <div class="med-status" id="medScaleStatus">Balança desconectada</div>
+          </div>
+          <button class="btn btn-outline-primary w-100 mt-3" id="btnBalanca" type="button">
+            <i class="bi bi-bluetooth"></i> Receber peso
+          </button>
+          <div class="input-group input-group-sm mt-2">
+            <span class="input-group-text">Peso</span>
+            <input id="medPeso" class="form-control text-end" inputmode="decimal" placeholder="0" />
+            <span class="input-group-text">kg</span>
+          </div>
+
+          <hr class="my-3" />
+
+          <label class="form-label mb-1">SKU do produto</label>
+          <input id="medSku" class="form-control" list="medSkuList" placeholder="Digite ou escolha o SKU" autocomplete="off" />
+          <datalist id="medSkuList"><% skus.forEach(function(s){ %><option value="<%= s %>"></option><% }); %></datalist>
+          <small class="text-muted mt-1">As medidas serão aplicadas a todos os anúncios deste SKU.</small>
+
+          <button class="btn btn-success w-100 mt-3" id="btnSalvarMedicao" type="button">
+            <i class="bi bi-check2-circle"></i> Calcular e salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resultado -->
+  <div id="medResult" class="card shadow-sm mt-3 d-none border-primary">
+    <div class="card-body" id="medResultBody"></div>
+  </div>
+</div>
+
+<script src="/js/medir.js"></script>
+<%- include('partials/footer') %>

@@ -415,6 +415,22 @@ table a {
   opacity: 0.6;
 }
 
+/* Campos de medida (L · A · C · peso) na página Produtos */
+.med-dim {
+  width: 46px;
+  font-size: 0.75rem;
+  padding: 0.12rem 0.2rem;
+}
+
+.med-dim-peso {
+  width: 52px;
+  margin-left: 4px;
+}
+
+.med-dim.saving {
+  opacity: 0.55;
+}
+
 /* ===== Badges / pílulas ===== */
 .badge {
   font-weight: 600;
@@ -615,6 +631,114 @@ table a {
   background: var(--mh-primary) !important;
   border-color: var(--mh-primary) !important;
   color: #fff !important;
+}
+
+/* ===== Página de Medição (câmera + balança simuladas) ===== */
+.med-scanner {
+  position: relative;
+  height: 180px;
+  border: 2px dashed var(--mh-border);
+  border-radius: var(--mh-radius);
+  background: var(--mh-primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.med-box {
+  font-size: 3.6rem;
+  color: var(--mh-primary);
+  opacity: 0.45;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.med-scanline {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 3px;
+  background: var(--mh-primary);
+  box-shadow: 0 0 10px var(--mh-primary);
+  top: 12%;
+  opacity: 0;
+}
+
+.med-scanner.scanning .med-scanline {
+  opacity: 1;
+  animation: medScan 1s linear infinite;
+}
+
+.med-scanner.scanning .med-box {
+  opacity: 0.8;
+}
+
+@keyframes medScan {
+  0% { top: 12%; }
+  50% { top: 84%; }
+  100% { top: 12%; }
+}
+
+.med-scanner.done {
+  border-color: var(--mh-success);
+  border-style: solid;
+  background: #f0fdf4;
+}
+
+.med-scanner.done .med-box {
+  color: var(--mh-success);
+  opacity: 0.85;
+}
+
+.med-status {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--mh-muted);
+}
+
+.med-scale {
+  position: relative;
+  height: 180px;
+  border: 1px solid var(--mh-border);
+  border-radius: var(--mh-radius);
+  background: var(--mh-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.med-scale > i {
+  font-size: 2.4rem;
+  color: var(--mh-muted);
+  transition: color 0.2s ease;
+}
+
+.med-scale-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--mh-primary);
+  letter-spacing: -0.02em;
+}
+
+.med-scale.scanning > i {
+  color: var(--mh-primary);
+  animation: medPulse 1s ease-in-out infinite;
+}
+
+.med-scale.done {
+  border-color: var(--mh-success);
+}
+
+@keyframes medPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
 }
 
 /* ===== Calculadora de frete: célula destacada ===== */

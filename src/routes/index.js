@@ -29,8 +29,9 @@ import {
 import { exportExcel } from "../controllers/exportController.js";
 import { showRules, saveRules } from "../controllers/rulesController.js";
 import { showSimulator, runSimulator } from "../controllers/simulatorController.js";
-import { showProducts, saveProductCost } from "../controllers/productController.js";
+import { showProducts, saveProductCost, saveProductDims } from "../controllers/productController.js";
 import { showFrete } from "../controllers/freteController.js";
+import { showMedir } from "../controllers/medirController.js";
 
 const router = Router();
 
@@ -51,6 +52,7 @@ router.get("/", showDashboard);
 router.get("/anuncios", showItems);
 router.get("/dashboard", showDashboard);
 router.get("/produtos", showProducts);
+router.get("/medir", showMedir);
 router.get("/regras", showRules);
 router.get("/simulador", showSimulator);
 router.get("/frete", showFrete);
@@ -67,6 +69,7 @@ router.post("/sync/selection", startSyncSelection);
 router.get("/sync/status", syncStatus);
 router.post("/settings/zip", saveZipCode);
 router.post("/produtos/custo", saveProductCost);
+router.post("/produtos/medidas", saveProductDims);
 router.post("/regras", saveRules);
 router.post("/simulador", runSimulator);
 router.get("/export", exportExcel);

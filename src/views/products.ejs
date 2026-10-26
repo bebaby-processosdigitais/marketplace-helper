@@ -3,12 +3,14 @@
 <%- include('partials/nav') %>
 
 <div class="container-fluid py-3 px-md-4">
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-1">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
     <h3 class="mb-0"><i class="bi bi-box2"></i> Produtos</h3>
+    <a href="/medir" class="btn btn-sm btn-primary"><i class="bi bi-rulers"></i> Medir com câmera/balança</a>
   </div>
   <p class="text-muted">
-    Cada produto agrupa os anúncios com o mesmo <strong>SKU</strong>. Preencha o custo aqui e ele é
-    aplicado a <strong>todos os anúncios</strong> daquele SKU (Clássico, Premium, variações).
+    Cada produto agrupa os anúncios com o mesmo <strong>SKU</strong>. O custo e as <strong>medidas</strong>
+    (L·A·C·peso) são aplicados a <strong>todos os anúncios</strong> daquele SKU. Com as medidas, comparamos
+    o <strong>frete cobrado</strong> (ML) com o <strong>frete real</strong> (cubagem) e sinalizamos divergências.
   </p>
 
   <!-- Busca -->
@@ -40,12 +42,14 @@
           <th>SKU</th>
           <th>Produto</th>
           <th class="text-center">Anúncios</th>
-          <th class="text-end" style="width: 160px;">Custo do produto</th>
+          <th class="text-end" style="width: 150px;">Custo do produto</th>
+          <th class="text-center" style="width: 230px;">Medidas (cm · kg)</th>
+          <th class="text-end" style="width: 185px;">Frete cobrado × real</th>
         </tr>
       </thead>
       <tbody>
         <% if (products.length === 0) { %>
-          <tr><td colspan="5" class="text-center text-muted py-4">
+          <tr><td colspan="7" class="text-center text-muted py-4">
             Nenhum produto com SKU. Rode um <strong>Atualizar tudo</strong> na tela de Anúncios.
           </td></tr>
         <% } %>
@@ -75,6 +79,35 @@
                        title="<%= p.custoMisto ? 'Custos diferentes entre os anúncios deste SKU — salvar unifica todos' : '' %>" />
               </div>
               <% if (p.custoMisto) { %><small class="text-warning d-block">custos divergentes</small><% } %>
+            </td>
+
+            <!-- Medidas (L · A · C · peso) -->
+            <td class="produto-med" data-sku="<%= p.sku %>">
+              <div class="d-flex gap-1 justify-content-center align-items-center flex-nowrap">
+                <input class="form-control form-control-sm med-dim text-center" data-dim="largura" inputmode="decimal" placeholder="L" title="Largura (cm)" value="<%= p.largura != null ? p.largura : '' %>" />
+                <span class="text-muted small">×</span>
+                <input class="form-control form-control-sm med-dim text-center" data-dim="altura" inputmode="decimal" placeholder="A" title="Altura (cm)" value="<%= p.altura != null ? p.altura : '' %>" />
+                <span class="text-muted small">×</span>
+                <input class="form-control form-control-sm med-dim text-center" data-dim="comprimento" inputmode="decimal" placeholder="C" title="Comprimento (cm)" value="<%= p.comprimento != null ? p.comprimento : '' %>" />
+                <input class="form-control form-control-sm med-dim med-dim-peso text-center" data-dim="pesoReal" inputmode="decimal" placeholder="kg" title="Peso real (kg)" value="<%= p.pesoReal != null ? p.pesoReal : '' %>" />
+              </div>
+            </td>
+
+            <!-- Frete cobrado × real -->
+            <td class="text-end produto-frete" data-sku="<%= p.sku %>">
+              <% if (!p.temMedidas) { %>
+                <span class="text-muted small">sem medidas</span>
+              <% } else if (p.freteCobrado == null) { %>
+                <span class="text-muted small">real R$ <%= p.freteReal.toFixed(2) %> · sem cobrado</span>
+              <% } else { %>
+                <div class="small text-muted">Cobrado: R$ <%= p.freteCobrado.toFixed(2) %></div>
+                <div class="small">Real: <strong>R$ <%= p.freteReal.toFixed(2) %></strong></div>
+                <% if (p.divergente) { %>
+                  <span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle"></i> Δ R$ <%= Math.abs(p.delta).toFixed(2) %></span>
+                <% } else { %>
+                  <span class="badge text-bg-success"><i class="bi bi-check-circle"></i> OK</span>
+                <% } %>
+              <% } %>
             </td>
           </tr>
         <% }); %>

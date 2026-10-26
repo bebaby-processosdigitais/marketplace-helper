@@ -196,6 +196,76 @@
   });
 })();
 
+// ============ Medidas por SKU (página Produtos) ============
+(function () {
+  const cells = document.querySelectorAll(".produto-med");
+  if (!cells.length) return;
+
+  const brl = (v) => "R$ " + Number(v).toFixed(2);
+
+  function renderFrete(sku, cmp) {
+    const cell = document.querySelector('.produto-frete[data-sku="' + CSS.escape(sku) + '"]');
+    if (!cell) return;
+    if (!cmp || !cmp.temMedidas) {
+      cell.innerHTML = '<span class="text-muted small">sem medidas</span>';
+      return;
+    }
+    if (cmp.freteCobrado == null) {
+      cell.innerHTML = '<span class="text-muted small">real ' + brl(cmp.freteReal) + " · sem cobrado</span>";
+      return;
+    }
+    let h = '<div class="small text-muted">Cobrado: ' + brl(cmp.freteCobrado) + "</div>";
+    h += '<div class="small">Real: <strong>' + brl(cmp.freteReal) + "</strong></div>";
+    if (cmp.divergente) {
+      h += '<span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle"></i> Δ ' + brl(Math.abs(cmp.delta)) + "</span>";
+    } else {
+      h += '<span class="badge text-bg-success"><i class="bi bi-check-circle"></i> OK</span>';
+    }
+    cell.innerHTML = h;
+  }
+
+  // Token por SKU: ignora respostas que chegam fora de ordem.
+  const tokens = {};
+
+  async function salvarMedidas(td) {
+    const sku = td.dataset.sku;
+    const inputs = td.querySelectorAll(".med-dim");
+    const payload = { sku };
+    inputs.forEach((i) => (payload[i.dataset.dim] = i.value));
+    const myToken = (tokens[sku] = (tokens[sku] || 0) + 1);
+    inputs.forEach((i) => i.classList.add("saving"));
+    try {
+      const res = await fetch("/produtos/medidas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "falha");
+      if (tokens[sku] === myToken) renderFrete(sku, data.comparacao);
+    } catch (e) {
+      /* silencioso: mantém o valor digitado */
+    } finally {
+      inputs.forEach((i) => i.classList.remove("saving"));
+    }
+  }
+
+  // Debounce por célula: salva uma vez quando o usuário para de editar.
+  const timers = new WeakMap();
+  function agendarSalvar(td) {
+    clearTimeout(timers.get(td));
+    timers.set(td, setTimeout(() => salvarMedidas(td), 400));
+  }
+
+  document.querySelectorAll(".med-dim").forEach(function (inp) {
+    const td = inp.closest(".produto-med");
+    inp.addEventListener("input", () => agendarSalvar(td));
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); inp.blur(); }
+    });
+  });
+})();
+
 // ============ Menu lateral: recolher (desktop) / abrir (mobile) ============
 (function () {
   const burger = document.getElementById("appBurger");

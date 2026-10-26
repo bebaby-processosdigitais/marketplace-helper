@@ -61,6 +61,51 @@
     <%- kpiValue('Com custo preenchido', comCusto + ' <small class="text-muted fs-6">de ' + total + '</small>', '', 'cobertura de custo', 'check2-circle', 'success') %>
   </div>
 
+  <!-- Frete divergente (real x cobrado) -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-rulers text-danger"></i> Frete divergente (real × cobrado)</span>
+      <% if (freteDivergente > 0) { %>
+        <a href="/anuncios?filter=frete_divergente" class="badge text-bg-danger text-decoration-none">
+          <%= freteDivergente %> anúncio(s) · ver todos
+        </a>
+      <% } %>
+    </div>
+    <div class="card-body p-0">
+      <% if (!divergentesTop || divergentesTop.length === 0) { %>
+        <div class="text-center text-muted py-4">
+          <i class="bi bi-check-circle text-success fs-4 d-block mb-2"></i>
+          Nenhuma divergência de frete detectada. Cadastre as medidas em
+          <a href="/medir">Medição</a> ou <a href="/produtos">Produtos</a> para comparar o frete
+          cobrado com o real.
+        </div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0 align-middle">
+            <thead class="table-light">
+              <tr><th>MLB</th><th>Título</th><th class="text-end">Cobrado</th><th class="text-end">Real</th><th class="text-end">Δ</th></tr>
+            </thead>
+            <tbody>
+              <% divergentesTop.forEach(function(d) { var up = d.delta > 0; %>
+                <tr>
+                  <td><small><%= d.mlb %></small></td>
+                  <td class="text-truncate" style="max-width: 240px;" title="<%= d.titulo %>"><%= d.titulo %></td>
+                  <td class="text-end text-muted">R$ <%= d.freteCobrado.toFixed(2) %></td>
+                  <td class="text-end fw-semibold">R$ <%= d.freteReal.toFixed(2) %></td>
+                  <td class="text-end">
+                    <span class="badge <%= up ? 'text-bg-danger' : 'text-bg-success' %>" title="<%= up ? 'Real acima do cobrado (subdeclarado)' : 'Real abaixo do cobrado (superdeclarado)' %>">
+                      <i class="bi bi-arrow-<%= up ? 'up' : 'down' %>"></i> R$ <%= Math.abs(d.delta).toFixed(2) %>
+                    </span>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
   <!-- Insights inteligentes -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-white fw-semibold">

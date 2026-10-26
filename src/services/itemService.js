@@ -1,6 +1,7 @@
 import prisma from "../config/prisma.js";
 import { getBusinessRules } from "./rulesService.js";
 import { computeProfit } from "./calcService.js";
+import { avaliaDivergencia } from "./freteTable.js";
 
 export const PAGE_SIZE = 50;
 
@@ -67,6 +68,11 @@ export const FILTERS = {
   sem_custo: {
     label: "Sem custo preenchido (ativos)",
     where: { status: "active", custoProduto: null },
+  },
+  frete_divergente: {
+    label: "Frete divergente (real × cobrado)",
+    computed: true,
+    test: (it) => avaliaDivergencia(it).divergente,
   },
 };
 

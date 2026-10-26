@@ -1,6 +1,7 @@
 import prisma from "../config/prisma.js";
 import { getBusinessRules } from "./rulesService.js";
 import { computeProfit, computeHealth } from "./calcService.js";
+import { avaliaDivergencia } from "./freteTable.js";
 
 // Dados do dashboard, escopados ao usuario
 export async function getDashboardData(userId) {
@@ -74,6 +75,8 @@ export async function getDashboardData(userId) {
   let somaCustoMLpct = 0, countCustoMLpct = 0;
   let semEstoqueAtivos = 0, semCustoAtivos = 0, semVendasAtivos = 0, freteSubiu = 0;
   let estoqueBaixo = 0, fullEstoqueBaixo = 0;
+  let freteDivergente = 0;
+  const divergentes = [];
 
   const LIMIAR = 8; // limiar de desempenho (margem %) acordado com o usuário
 
@@ -83,6 +86,16 @@ export async function getDashboardData(userId) {
 
     if (it.freteMudou && it.frete != null && it.freteAnterior != null && it.frete > it.freteAnterior) {
       freteSubiu++;
+    }
+
+    // Frete divergente: real (cubagem das medidas) x cobrado (ML).
+    const dv = avaliaDivergencia(it);
+    if (dv.divergente) {
+      freteDivergente++;
+      divergentes.push({
+        mlb: it.mlb, titulo: it.titulo, sku: it.sku,
+        freteCobrado: dv.freteCobrado, freteReal: dv.freteReal, delta: dv.delta,
+      });
     }
 
     if (it.status === "active") {
@@ -132,6 +145,12 @@ export async function getDashboardData(userId) {
     insights.push({ color: "secondary", icon: "cart-x", titulo: `${semVendasAtivos} anúncio(s) ativos sem nenhuma venda`, texto: "Revise título, fotos e preço para destravar as vendas.", link: "/anuncios?sort=vendas&dir=asc" });
   if (freteSubiu > 0)
     insights.push({ color: "warning", icon: "truck", titulo: `Frete subiu em ${freteSubiu} anúncio(s)`, texto: "O custo de frete aumentou no último sync — reveja a margem desses itens.", link: "/anuncios?sort=frete&dir=desc" });
+  if (freteDivergente > 0)
+    insights.push({ color: "danger", icon: "rulers", titulo: `${freteDivergente} anúncio(s) com frete divergente`, texto: "O frete real (pelas medidas) difere do cobrado — confira as dimensões cadastradas no ML.", link: "/anuncios?filter=frete_divergente" });
+
+  const divergentesTop = divergentes
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    .slice(0, 10);
 
   return {
     ultimosAnuncios,
@@ -144,6 +163,8 @@ export async function getDashboardData(userId) {
     estoqueBaixo,
     fullEstoqueBaixo,
     semCustoAtivos,
+    freteDivergente,
+    divergentesTop,
     comCusto,
     countMargem,
     // KPIs financeiros (valores)

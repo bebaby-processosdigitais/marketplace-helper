@@ -74,6 +74,10 @@ model Item {
   variacaoSkus  String?
   marca         String?
   titulo        String   @default("")
+  largura       Float?
+  altura        Float?
+  comprimento   Float?
+  pesoReal      Float?
   thumbnail     String?
   permalink     String?
   custoProduto  Float?
