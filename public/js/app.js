@@ -203,17 +203,9 @@
 
   const brl = (v) => "R$ " + Number(v).toFixed(2);
 
-  function renderFrete(sku, cmp) {
-    const cell = document.querySelector('.produto-frete[data-sku="' + CSS.escape(sku) + '"]');
-    if (!cell) return;
-    if (!cmp || !cmp.temMedidas) {
-      cell.innerHTML = '<span class="text-muted small">sem medidas</span>';
-      return;
-    }
-    if (cmp.freteCobrado == null) {
-      cell.innerHTML = '<span class="text-muted small">real ' + brl(cmp.freteReal) + " · sem cobrado</span>";
-      return;
-    }
+  function freteHtml(cmp) {
+    if (!cmp || !cmp.temMedidas) return '<span class="text-muted small">sem medidas</span>';
+    if (cmp.freteCobrado == null) return '<span class="text-muted small">real ' + brl(cmp.freteReal) + " · sem cobrado</span>";
     let h = '<div class="small text-muted">Cobrado: ' + brl(cmp.freteCobrado) + "</div>";
     h += '<div class="small">Real: <strong>' + brl(cmp.freteReal) + "</strong></div>";
     if (cmp.divergente) {
@@ -221,7 +213,15 @@
     } else {
       h += '<span class="badge text-bg-success"><i class="bi bi-check-circle"></i> OK</span>';
     }
-    cell.innerHTML = h;
+    return h;
+  }
+
+  // Atualiza todas as células do mesmo SKU (tabela do desktop + card do mobile).
+  function renderFrete(sku, cmp) {
+    const html = freteHtml(cmp);
+    document.querySelectorAll('.produto-frete[data-sku="' + CSS.escape(sku) + '"]').forEach((cell) => {
+      cell.innerHTML = html;
+    });
   }
 
   // Token por SKU: ignora respostas que chegam fora de ordem.
