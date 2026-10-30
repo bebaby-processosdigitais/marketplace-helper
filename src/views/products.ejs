@@ -124,8 +124,10 @@
     <% } %>
     <% products.forEach(function(p) { %>
       <div class="card shadow-sm mb-2">
-        <div class="card-body p-2">
-          <div class="d-flex gap-2">
+        <div class="card-body p-3">
+
+          <!-- Cabeçalho do produto -->
+          <div class="d-flex gap-2 mb-3">
             <% if (p.thumbnail) { %>
               <img src="<%= p.thumbnail %>" class="item-card-img" alt="" loading="lazy" />
             <% } else { %>
@@ -133,53 +135,69 @@
             <% } %>
             <div class="flex-grow-1" style="min-width: 0;">
               <div class="fw-semibold item-card-title" title="<%= p.nome %>"><%= p.nome %></div>
-              <div class="small text-muted mb-2">
+              <div class="small text-muted">
                 <span class="fw-semibold"><%= p.sku %></span>
-                · <a href="/anuncios?search=<%= encodeURIComponent(p.sku) %>" class="badge text-bg-primary text-decoration-none"><%= p.qtd %> anúncio(s)</a>
+                · <a href="/anuncios?search=<%= encodeURIComponent(p.sku) %>" class="text-decoration-none"><%= p.qtd %> anúncio(s)</a>
               </div>
+            </div>
+          </div>
 
-              <div class="row g-2 small align-items-end">
-                <div class="col-5">
-                  <span class="mcard-lbl">Custo</span>
-                  <div class="input-group input-group-sm produto-custo-group">
-                    <span class="input-group-text">R$</span>
-                    <input type="text" inputmode="decimal" class="form-control produto-custo-input text-end"
-                           data-sku="<%= p.sku %>"
-                           value="<%= p.custo != null ? p.custo.toFixed(2) : '' %>" placeholder="0,00" />
-                  </div>
-                  <% if (p.custoMisto) { %><small class="text-warning">custos divergentes</small><% } %>
+          <div class="d-flex flex-column gap-3">
+
+            <!-- Custo -->
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <span class="mcard-lbl">Custo do produto<% if (p.custoMisto) { %> <span class="text-warning">(divergente)</span><% } %></span>
+              <div class="input-group input-group-sm produto-custo-group" style="width: 128px;">
+                <span class="input-group-text">R$</span>
+                <input type="text" inputmode="decimal" class="form-control produto-custo-input text-end"
+                       data-sku="<%= p.sku %>"
+                       value="<%= p.custo != null ? p.custo.toFixed(2) : '' %>" placeholder="0,00" />
+              </div>
+            </div>
+
+            <!-- Medidas -->
+            <div>
+              <div class="mcard-lbl mb-1">Medidas · L × A × C (cm) · peso (kg)</div>
+              <div class="produto-med row g-2" data-sku="<%= p.sku %>">
+                <div class="col-3">
+                  <input class="form-control form-control-sm med-dim text-center" style="width:100%" data-dim="largura" inputmode="decimal" placeholder="0" value="<%= p.largura != null ? p.largura : '' %>" />
+                  <div class="mcard-lbl text-center mt-1" style="font-size:.6rem">Larg.</div>
                 </div>
-                <div class="col-7 text-end">
-                  <span class="mcard-lbl">Frete cobrado × real</span>
-                  <div class="produto-frete" data-sku="<%= p.sku %>">
-                    <% if (!p.temMedidas) { %>
-                      <span class="text-muted small">sem medidas</span>
-                    <% } else if (p.freteCobrado == null) { %>
-                      <span class="text-muted small">real R$ <%= p.freteReal.toFixed(2) %> · sem cobrado</span>
-                    <% } else { %>
-                      <div class="small text-muted">Cobrado: R$ <%= p.freteCobrado.toFixed(2) %></div>
-                      <div class="small">Real: <strong>R$ <%= p.freteReal.toFixed(2) %></strong></div>
-                      <% if (p.divergente) { %>
-                        <span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle"></i> Δ R$ <%= Math.abs(p.delta).toFixed(2) %></span>
-                      <% } else { %>
-                        <span class="badge text-bg-success"><i class="bi bi-check-circle"></i> OK</span>
-                      <% } %>
-                    <% } %>
-                  </div>
+                <div class="col-3">
+                  <input class="form-control form-control-sm med-dim text-center" style="width:100%" data-dim="altura" inputmode="decimal" placeholder="0" value="<%= p.altura != null ? p.altura : '' %>" />
+                  <div class="mcard-lbl text-center mt-1" style="font-size:.6rem">Alt.</div>
                 </div>
-                <div class="col-12">
-                  <span class="mcard-lbl">Medidas (cm · kg)</span>
-                  <div class="produto-med d-flex gap-1 align-items-center" data-sku="<%= p.sku %>">
-                    <input class="form-control form-control-sm med-dim text-center" data-dim="largura" inputmode="decimal" placeholder="L" title="Largura (cm)" value="<%= p.largura != null ? p.largura : '' %>" />
-                    <span class="text-muted">×</span>
-                    <input class="form-control form-control-sm med-dim text-center" data-dim="altura" inputmode="decimal" placeholder="A" title="Altura (cm)" value="<%= p.altura != null ? p.altura : '' %>" />
-                    <span class="text-muted">×</span>
-                    <input class="form-control form-control-sm med-dim text-center" data-dim="comprimento" inputmode="decimal" placeholder="C" title="Comprimento (cm)" value="<%= p.comprimento != null ? p.comprimento : '' %>" />
-                    <input class="form-control form-control-sm med-dim med-dim-peso text-center" data-dim="pesoReal" inputmode="decimal" placeholder="kg" title="Peso real (kg)" value="<%= p.pesoReal != null ? p.pesoReal : '' %>" />
-                  </div>
+                <div class="col-3">
+                  <input class="form-control form-control-sm med-dim text-center" style="width:100%" data-dim="comprimento" inputmode="decimal" placeholder="0" value="<%= p.comprimento != null ? p.comprimento : '' %>" />
+                  <div class="mcard-lbl text-center mt-1" style="font-size:.6rem">Comp.</div>
+                </div>
+                <div class="col-3">
+                  <input class="form-control form-control-sm med-dim text-center" style="width:100%" data-dim="pesoReal" inputmode="decimal" placeholder="0" value="<%= p.pesoReal != null ? p.pesoReal : '' %>" />
+                  <div class="mcard-lbl text-center mt-1" style="font-size:.6rem">Peso</div>
                 </div>
               </div>
             </div>
+
+            <!-- Frete cobrado × real -->
+            <div class="border-top pt-2 d-flex align-items-start justify-content-between gap-2">
+              <span class="mcard-lbl" style="margin-top:2px">Frete cobrado × real</span>
+              <div class="produto-frete text-end" data-sku="<%= p.sku %>">
+                <% if (!p.temMedidas) { %>
+                  <span class="text-muted small">sem medidas</span>
+                <% } else if (p.freteCobrado == null) { %>
+                  <span class="text-muted small">real R$ <%= p.freteReal.toFixed(2) %> · sem cobrado</span>
+                <% } else { %>
+                  <div class="small text-muted">Cobrado: R$ <%= p.freteCobrado.toFixed(2) %></div>
+                  <div class="small">Real: <strong>R$ <%= p.freteReal.toFixed(2) %></strong></div>
+                  <% if (p.divergente) { %>
+                    <span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle"></i> Δ R$ <%= Math.abs(p.delta).toFixed(2) %></span>
+                  <% } else { %>
+                    <span class="badge text-bg-success"><i class="bi bi-check-circle"></i> OK</span>
+                  <% } %>
+                <% } %>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
