@@ -1,7 +1,7 @@
 import prisma from "../config/prisma.js";
 import { getBusinessRules } from "./rulesService.js";
 import { computeProfit } from "./calcService.js";
-import { avaliaDivergencia } from "./freteTable.js";
+import { avaliaDivergencia, classificarTamanhoFull } from "./freteTable.js";
 
 export const PAGE_SIZE = 50;
 
@@ -61,9 +61,27 @@ export const FILTERS = {
     label: "Estoque baixo (≤ 5, ativos)",
     where: { status: "active", estoque: { lte: 5 } },
   },
+  full: { label: "No Full", where: { full: true } },
   full_estoque_baixo: {
     label: "Full com estoque baixo (≤ 5, ativos)",
     where: { status: "active", full: true, estoque: { lte: 5 } },
+  },
+  full_sem_estoque: {
+    label: "Full sem estoque / ruptura (ativos)",
+    where: { status: "active", full: true, estoque: { lte: 0 } },
+  },
+  full_parado: {
+    label: "Full parado (com estoque, sem vendas, ativos)",
+    where: { status: "active", full: true, estoque: { gt: 0 }, vendas: 0 },
+  },
+  full_fora: {
+    label: "Full fora dos limites de tamanho (pelas medidas)",
+    computed: true,
+    test: (it) => {
+      if (!it.full) return false;
+      const tam = classificarTamanhoFull(it.largura, it.altura, it.comprimento, it.pesoReal);
+      return !!tam && tam.dentroDoFull === false;
+    },
   },
   sem_custo: {
     label: "Sem custo preenchido (ativos)",

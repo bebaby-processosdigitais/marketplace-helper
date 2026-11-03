@@ -5,6 +5,7 @@ import {
 import { listItems } from "../services/itemService.js";
 import { listProducts, setCostForSku, setDimsForSku } from "../services/productService.js";
 import { getDashboardData } from "../services/dashboardService.js";
+import { getFullData } from "../services/fullService.js";
 import { getBusinessRules, updateBusinessRules } from "../services/rulesService.js";
 import { freteEstimado } from "../services/freteTable.js";
 import { runSync, getSyncState, getSettings, updateZipCode } from "../services/syncService.js";
@@ -43,6 +44,10 @@ export async function me(req, res) {
 // ===== Dados =====
 export async function dashboard(req, res) {
   res.json(await getDashboardData(req.user.id));
+}
+
+export async function full(req, res) {
+  res.json(await getFullData(req.user.id));
 }
 
 export async function anuncios(req, res) {

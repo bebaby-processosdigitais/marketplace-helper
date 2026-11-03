@@ -32,6 +32,7 @@ import { showSimulator, runSimulator } from "../controllers/simulatorController.
 import { showProducts, saveProductCost, saveProductDims } from "../controllers/productController.js";
 import { showFrete } from "../controllers/freteController.js";
 import { showMedir } from "../controllers/medirController.js";
+import { showFull } from "../controllers/fullController.js";
 
 const router = Router();
 
@@ -51,6 +52,7 @@ router.use(requireAuth);
 router.get("/", showDashboard);
 router.get("/anuncios", showItems);
 router.get("/dashboard", showDashboard);
+router.get("/full", showFull);
 router.get("/produtos", showProducts);
 router.get("/medir", showMedir);
 router.get("/regras", showRules);

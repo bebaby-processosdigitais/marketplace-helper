@@ -18,6 +18,7 @@ export const openapiSpec = {
     { name: "Autenticação" },
     { name: "Conta" },
     { name: "Dados" },
+    { name: "Full" },
     { name: "Produtos" },
     { name: "Frete" },
     { name: "Sincronização" },
@@ -90,6 +91,12 @@ export const openapiSpec = {
         responses: { 200: json({ prejuizo: 3, altoDesempenho: 18, freteDivergente: 5, ticketMedio: 155.78, divergentesTop: [{ mlb: "MLB123", titulo: "Produto X", freteCobrado: 10, freteReal: 58.75, delta: 48.75 }] }) },
       },
     },
+    "/full": {
+      get: {
+        tags: ["Full"], summary: "Métricas, distribuição por tamanho, insights e listas dos anúncios no Full", security: bearer,
+        responses: { 200: json({ totalFull: 24, penetracao: 32.4, ativos: 22, estoqueTotal: 180, vendasTotal: 540, semEstoque: 2, estoqueBaixo: 5, parados: 3, foraLimites: 1, ticketMedio: 155.78, margemMedia: 14.2, distTamanho: [{ nome: "Pequeno", count: 10, cor: "success", pct: 41.7 }], insights: [{ color: "danger", icon: "x-octagon", titulo: "2 anúncio(s) no Full em ruptura", texto: "…", link: "/anuncios?filter=full_sem_estoque" }], estoqueBaixoList: [], paradosList: [], topVendas: [], foraList: [] }) },
+      },
+    },
     "/anuncios": {
       get: {
         tags: ["Dados"], summary: "Lista de anúncios (com lucro, margem e saúde)", security: bearer,
@@ -97,7 +104,7 @@ export const openapiSpec = {
           { name: "search", in: "query", schema: { type: "string" }, description: "MLB, título ou SKU" },
           { name: "sort", in: "query", schema: { type: "string" }, description: "mlb, titulo, precoDe, margem, lucro, custoML, visitas, vendas, estoque…" },
           { name: "dir", in: "query", schema: { type: "string", enum: ["asc", "desc"] } },
-          { name: "filter", in: "query", schema: { type: "string", enum: ["prejuizo", "alto", "baixo", "catalogo", "estoque_baixo", "full_estoque_baixo", "sem_custo", "frete_divergente"] } },
+          { name: "filter", in: "query", schema: { type: "string", enum: ["prejuizo", "alto", "baixo", "catalogo", "estoque_baixo", "full", "full_estoque_baixo", "full_sem_estoque", "full_parado", "full_fora", "sem_custo", "frete_divergente"] } },
           { name: "page", in: "query", schema: { type: "integer" } },
         ],
         responses: { 200: json({ total: 42, page: 1, totalPages: 1, filterLabel: "", items: [{ mlb: "MLB123", titulo: "Produto X", precoDe: 100, precoPor: 100, frete: 16, comissao: 17, _calc: { base: 100, lucro: 40, margem: 40, custoML: 33 } }] }) },

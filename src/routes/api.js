@@ -16,6 +16,7 @@ router.use(a(requireApiAuth));
 
 router.get("/me", a(api.me));
 router.get("/dashboard", a(api.dashboard));
+router.get("/full", a(api.full));
 router.get("/anuncios", a(api.anuncios));
 router.get("/produtos", a(api.produtos));
 router.get("/produtos/export", a(api.exportProdutos));

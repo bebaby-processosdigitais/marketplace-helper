@@ -1,0 +1,276 @@
+<% var active = 'full'; %>
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+
+<div class="container-fluid py-3 px-md-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <h3 class="mb-0"><i class="bi bi-lightning-charge-fill text-success"></i> Full</h3>
+    <a href="/anuncios?filter=full" class="btn btn-sm btn-outline-success">
+      <i class="bi bi-list-ul"></i> Ver todos os anúncios no Full
+    </a>
+  </div>
+
+  <%
+    function mlUrl(it) {
+      if (it.permalink) return it.permalink;
+      var digits = String(it.mlb).replace(/\D/g, '');
+      return 'https://produto.mercadolivre.com.br/MLB-' + digits;
+    }
+    function kpiLink(href, label, value, valueClass, sub, icon, color) {
+      return '<div class="col"><a href="' + href + '" class="card kpi kpi-link shadow-sm h-100 text-decoration-none">'
+        + '<div class="card-body d-flex align-items-start gap-2">'
+        + '<div class="kpi-icon text-bg-' + color + '"><i class="bi bi-' + icon + '"></i></div>'
+        + '<div class="kpi-text flex-grow-1">'
+        + '<div class="kpi-label">' + label + '</div>'
+        + '<div class="kpi-value ' + (valueClass || '') + '">' + value + '</div>'
+        + '<small class="text-muted">' + sub + '</small>'
+        + '</div>'
+        + '<span class="kpi-go"><i class="bi bi-arrow-right-circle"></i></span>'
+        + '</div></a></div>';
+    }
+    function kpiValue(label, value, valueClass, sub, icon, color) {
+      return '<div class="col"><div class="card kpi shadow-sm h-100">'
+        + '<div class="card-body d-flex align-items-start gap-2">'
+        + '<div class="kpi-icon text-bg-' + color + '"><i class="bi bi-' + icon + '"></i></div>'
+        + '<div class="kpi-text flex-grow-1">'
+        + '<div class="kpi-label">' + label + '</div>'
+        + '<div class="kpi-value ' + (valueClass || '') + '">' + value + '</div>'
+        + '<small class="text-muted">' + sub + '</small>'
+        + '</div>'
+        + '</div></div></div>';
+    }
+    var comCustoSub = countMargem + ' com custo';
+  %>
+
+  <% if (totalFull === 0) { %>
+    <div class="card shadow-sm">
+      <div class="card-body text-center text-muted py-5">
+        <i class="bi bi-lightning-charge fs-1 d-block mb-2 text-success"></i>
+        Nenhum anúncio no Full por aqui ainda.
+        <div class="mt-2">Rode um <a href="/anuncios">Atualizar</a> para sincronizar os anúncios do Mercado Livre.</div>
+      </div>
+    </div>
+  <% } else { %>
+
+  <!-- Visão geral -->
+  <div class="kpi-group-label"><i class="bi bi-lightning-charge"></i> Visão geral do Full</div>
+  <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <%- kpiLink('/anuncios?filter=full', 'Anúncios no Full', totalFull, 'text-success', penetracao.toFixed(1) + '% do total (' + totalGeral + ')', 'lightning-charge-fill', 'success') %>
+    <%- kpiValue('Full ativos', ativos, '', inativos + ' inativo(s)', 'play-circle', 'primary') %>
+    <%- kpiValue('Estoque total no Full', estoqueTotal, '', 'unidades armazenadas', 'box-seam', 'primary') %>
+    <%- kpiValue('Vendas no Full', vendasTotal, '', visitasTotal + ' visita(s)', 'cart-check', 'success') %>
+  </div>
+
+  <!-- Alertas de estoque -->
+  <div class="kpi-group-label"><i class="bi bi-exclamation-octagon"></i> Alertas de estoque</div>
+  <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <%- kpiLink('/anuncios?filter=full_sem_estoque', 'Ruptura (sem estoque)', semEstoque, semEstoque > 0 ? 'text-danger' : '', 'ativos sem estoque', 'x-octagon', 'danger') %>
+    <%- kpiLink('/anuncios?filter=full_estoque_baixo', 'Estoque baixo', estoqueBaixo, estoqueBaixo > 0 ? 'text-danger' : '', '1 a 5 unidades · ativos', 'box-seam', 'danger') %>
+    <%- kpiLink('/anuncios?filter=full_parado', 'Parados sem venda', parados, parados > 0 ? 'text-warning' : '', 'com estoque · paga armazenagem', 'hourglass-split', 'warning') %>
+    <%- kpiLink('/anuncios?filter=full_fora', 'Fora dos limites', foraLimites, foraLimites > 0 ? 'text-danger' : '', 'excede tamanho/peso do Full', 'arrows-angle-expand', 'danger') %>
+  </div>
+
+  <!-- Saúde financeira -->
+  <div class="kpi-group-label"><i class="bi bi-wallet2"></i> Saúde financeira no Full</div>
+  <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <%- kpiValue('Ticket médio', 'R$ ' + ticketMedio.toFixed(2), '', 'preço de venda · ativos', 'cash-coin', 'primary') %>
+    <%- kpiValue('Margem média', margemMedia != null ? margemMedia.toFixed(1) + '%' : '—', '', comCustoSub, 'graph-up-arrow', 'primary') %>
+    <%- kpiValue('Lucro líquido médio', lucroMedio != null ? 'R$ ' + lucroMedio.toFixed(2) : '—', lucroMedio != null ? (lucroMedio >= 0 ? 'text-success' : 'text-danger') : '', 'por anúncio · ' + comCustoSub, 'coin', 'success') %>
+    <%- kpiLink('/anuncios?filter=prejuizo', 'No prejuízo', prejuizo, prejuizo > 0 ? 'text-danger' : '', 'margem < 0% · ' + comCustoSub, 'graph-down-arrow', 'danger') %>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <!-- Distribuição por tamanho no Full -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-semibold bg-white">
+          <i class="bi bi-rulers text-primary"></i> Distribuição por tamanho no Full
+        </div>
+        <div class="card-body">
+          <p class="text-muted small mb-3">
+            A armazenagem do Full é cobrada por faixa de tamanho. Itens maiores custam mais por unidade.
+            <% if (semMedidas > 0) { %><br><i class="bi bi-info-circle"></i> <%= semMedidas %> sem medidas cadastradas.<% } %>
+          </p>
+          <% distTamanho.forEach(function(t) { %>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge text-bg-<%= t.cor %>"><i class="bi bi-box-seam"></i> <%= t.nome %></span>
+                <span class="small text-muted"><strong class="text-dark"><%= t.count %></strong> · <%= t.pct.toFixed(0) %>%</span>
+              </div>
+              <div class="progress" style="height: 8px;" role="progressbar" aria-valuenow="<%= t.pct.toFixed(0) %>" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar bg-<%= t.cor === 'light' ? 'secondary' : t.cor %>" style="width: <%= Math.max(2, t.pct) %>%;"></div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights do Full -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-semibold bg-white">
+          <i class="bi bi-lightbulb text-warning"></i> Insights do Full
+        </div>
+        <div class="card-body">
+          <% if (insights && insights.length) { %>
+            <div class="d-flex flex-column gap-2">
+              <% insights.forEach(function(ins) { %>
+                <a href="<%= ins.link %>" class="text-decoration-none">
+                  <div class="d-flex gap-3 p-2 rounded insight-item">
+                    <div class="insight-icon text-bg-<%= ins.color %>"><i class="bi bi-<%= ins.icon %>"></i></div>
+                    <div>
+                      <div class="fw-semibold text-dark"><%= ins.titulo %></div>
+                      <div class="text-muted small"><%= ins.texto %></div>
+                    </div>
+                  </div>
+                </a>
+              <% }); %>
+            </div>
+          <% } else { %>
+            <div class="text-center text-muted py-4">
+              <i class="bi bi-check-circle text-success fs-4 d-block mb-2"></i>
+              Tudo certo no Full! Nenhum ponto de atenção no momento.
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estoque baixo / ruptura no Full -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold bg-white d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-box-seam text-danger"></i> Full · estoque baixo &amp; ruptura</span>
+      <a href="/anuncios?filter=full_estoque_baixo" class="badge text-bg-danger text-decoration-none">ver todos</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover mb-0 align-middle table-stack">
+        <thead class="table-light">
+          <tr><th>MLB</th><th>Título</th><th class="text-end">Estoque</th><th class="text-end">Vendas</th><th class="text-end">Margem</th><th>Saúde</th></tr>
+        </thead>
+        <tbody>
+          <% if (estoqueBaixoList.length === 0) { %>
+            <tr><td colspan="6" class="text-center text-muted py-3">Nenhum item no Full com estoque baixo. 👍</td></tr>
+          <% } %>
+          <% estoqueBaixoList.forEach(function(it) { %>
+            <tr>
+              <td data-label="MLB"><a href="<%= mlUrl(it) %>" target="_blank" rel="noopener"><small><%= it.mlb %></small></a></td>
+              <td data-label="Título" class="text-truncate" style="max-width: 280px;" title="<%= it.titulo %>"><%= it.titulo %></td>
+              <td data-label="Estoque" class="text-end">
+                <span class="badge <%= (it.estoque||0) <= 0 ? 'text-bg-danger' : 'text-bg-warning' %>"><%= it.estoque || 0 %></span>
+              </td>
+              <td data-label="Vendas" class="text-end"><%= it.vendas || 0 %></td>
+              <td data-label="Margem" class="text-end">
+                <% if (it._calc.margem != null) { %>
+                  <span class="<%= it._calc.margem >= 0 ? 'text-success' : 'text-danger' %> fw-semibold"><%= it._calc.margem.toFixed(1) %>%</span>
+                <% } else { %><span class="text-muted">—</span><% } %>
+              </td>
+              <td data-label="Saúde"><span class="badge text-bg-<%= it._health.color %>"><i class="bi bi-<%= it._health.icon %>"></i> <%= it._health.label %></span></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Parados no Full -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-semibold bg-white d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-hourglass-split text-warning"></i> Parados no Full (sem vendas)</span>
+          <% if (parados > 0) { %><a href="/anuncios?filter=full_parado" class="badge text-bg-warning text-decoration-none">ver todos</a><% } %>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0 align-middle table-stack">
+            <thead class="table-light">
+              <tr><th>MLB</th><th>Título</th><th class="text-end">Estoque</th><th class="text-end">Visitas</th></tr>
+            </thead>
+            <tbody>
+              <% if (paradosList.length === 0) { %>
+                <tr><td colspan="4" class="text-center text-muted py-3">Nenhum item parado. Tudo girando! 🚀</td></tr>
+              <% } %>
+              <% paradosList.forEach(function(it) { %>
+                <tr>
+                  <td data-label="MLB"><a href="<%= mlUrl(it) %>" target="_blank" rel="noopener"><small><%= it.mlb %></small></a></td>
+                  <td data-label="Título" class="text-truncate" style="max-width: 200px;" title="<%= it.titulo %>"><%= it.titulo %></td>
+                  <td data-label="Estoque" class="text-end fw-semibold"><%= it.estoque || 0 %></td>
+                  <td data-label="Visitas" class="text-end text-muted"><%= it.visitas || 0 %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mais vendidos no Full -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-semibold bg-white">
+          <i class="bi bi-trophy text-success"></i> Mais vendidos no Full (Top 10)
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0 align-middle table-stack">
+            <thead class="table-light">
+              <tr><th>MLB</th><th>Título</th><th class="text-end">Vendas</th><th class="text-end">Estoque</th></tr>
+            </thead>
+            <tbody>
+              <% if (topVendas.length === 0) { %>
+                <tr><td colspan="4" class="text-center text-muted py-3">Sem vendas registradas ainda.</td></tr>
+              <% } %>
+              <% topVendas.forEach(function(it) { %>
+                <tr>
+                  <td data-label="MLB"><a href="<%= mlUrl(it) %>" target="_blank" rel="noopener"><small><%= it.mlb %></small></a></td>
+                  <td data-label="Título" class="text-truncate" style="max-width: 200px;" title="<%= it.titulo %>"><%= it.titulo %></td>
+                  <td data-label="Vendas" class="text-end fw-semibold text-success"><%= it.vendas || 0 %></td>
+                  <td data-label="Estoque" class="text-end <%= (it.estoque||0) <= 5 ? 'text-danger fw-semibold' : 'text-muted' %>"><%= it.estoque || 0 %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fora dos limites do Full -->
+    <% if (foraList.length) { %>
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold bg-white d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-arrows-angle-expand text-danger"></i> Fora dos limites de tamanho do Full</span>
+          <a href="/anuncios?filter=full_fora" class="badge text-bg-danger text-decoration-none">ver todos</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0 align-middle table-stack">
+            <thead class="table-light">
+              <tr><th>MLB</th><th>Título</th><th class="text-end">L×A×C (cm)</th><th class="text-end">Peso (kg)</th><th class="text-end">Maior lado</th><th class="text-end">Soma</th></tr>
+            </thead>
+            <tbody>
+              <% foraList.forEach(function(it) {
+                   var somaX = it._tam.soma, maiorX = it._tam.maiorLado; %>
+                <tr>
+                  <td data-label="MLB"><a href="<%= mlUrl(it) %>" target="_blank" rel="noopener"><small><%= it.mlb %></small></a></td>
+                  <td data-label="Título" class="text-truncate" style="max-width: 280px;" title="<%= it.titulo %>"><%= it.titulo %></td>
+                  <td data-label="L×A×C" class="text-end"><%= (it.largura||0) %>×<%= (it.altura||0) %>×<%= (it.comprimento||0) %></td>
+                  <td data-label="Peso" class="text-end <%= (it.pesoReal||0) > 25 ? 'text-danger fw-semibold' : '' %>"><%= (it.pesoReal||0) %></td>
+                  <td data-label="Maior lado" class="text-end <%= maiorX > 120 ? 'text-danger fw-semibold' : '' %>"><%= maiorX %> cm</td>
+                  <td data-label="Soma" class="text-end <%= somaX > 260 ? 'text-danger fw-semibold' : '' %>"><%= somaX %> cm</td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer bg-white text-muted small">
+          Limites do Full: peso ≤ 25 kg · nenhum lado &gt; 120 cm · soma dos lados ≤ 260 cm.
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
