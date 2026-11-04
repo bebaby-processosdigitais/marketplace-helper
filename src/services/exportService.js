@@ -141,3 +141,70 @@ export async function buildProductsWorkbook(userId, search) {
   ws.autoFilter = { from: "A1", to: "O1" };
   return wb;
 }
+
+// Gera o workbook do relatório "Estoque Full/Cross/Carreta".
+// `cross` vem de buildCross(): { rows, locais, stats, emissao }.
+export function buildEstoqueCrossWorkbook(cross) {
+  const { rows, locais, emissao } = cross;
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "Marketplace Helper";
+  wb.created = new Date();
+
+  const agora = new Date();
+  const carimbo = agora.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  const ws = wb.addWorksheet("Estoque Cross");
+
+  // Colunas: bloco ML + bloco ERP (uma coluna por local) + sugestão.
+  const cols = [
+    { header: "MLBS", key: "mlbs", width: 26 },
+    { header: "SKU", key: "sku", width: 10 },
+    { header: "TITULO DO ANUNCIO", key: "titulo", width: 46 },
+    { header: "TEM CATALOGO?", key: "catalogo", width: 14 },
+    { header: "ESTA NO FULL?", key: "full", width: 13 },
+    { header: "ESTOQUE (ML)", key: "estoque", width: 13 },
+    { header: "ESTOQUE FULL", key: "estoqueFull", width: 13 },
+    { header: "STATUS", key: "status", width: 12 },
+    { header: "CADASTRADO NO ML?", key: "cadastrado", width: 17 },
+    { header: "PRODUTO (ERP)", key: "produtoErp", width: 42 },
+  ];
+  for (const l of locais) cols.push({ header: `${l.cod} - ${l.nome}`, key: `est${l.cod}`, width: 16 });
+  cols.push({ header: "SUGESTAO", key: "sugestao", width: 24 });
+  ws.columns = cols;
+
+  // Linha de título com o carimbo de data/hora (acima do cabeçalho).
+  const totalCols = cols.length;
+  const lastColLetter = ws.getColumn(totalCols).letter;
+  ws.spliceRows(1, 0, [`Relatório Estoque Full/Cross/Carreta — gerado em ${carimbo}${emissao ? " · emissão ERP: " + emissao : ""}`]);
+  ws.mergeCells(`A1:${lastColLetter}1`);
+  ws.getCell("A1").font = { bold: true, size: 12 };
+  ws.getCell("A1").alignment = { vertical: "middle" };
+  ws.getRow(1).height = 22;
+
+  // Cabeçalho (agora na linha 2).
+  const head = ws.getRow(2);
+  head.font = { bold: true };
+  head.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFE600" } };
+
+  const bool = (v) => (v == null ? "" : v ? "SIM" : "NAO");
+  for (const r of rows) {
+    const data = {
+      mlbs: r.mlbs,
+      sku: r.sku,
+      titulo: r.titulo,
+      catalogo: bool(r.temCatalogo),
+      full: bool(r.estaNoFull),
+      estoque: r.estoque ?? "",
+      estoqueFull: r.estoqueFull,
+      status: r.status,
+      cadastrado: r.cadastrado ? "SIM" : "NAO",
+      produtoErp: r.produtoErp,
+      sugestao: r.sugestao,
+    };
+    for (const l of locais) data[`est${l.cod}`] = r[`est${l.cod}`];
+    ws.addRow(data);
+  }
+
+  ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: totalCols } };
+  ws.views = [{ state: "frozen", ySplit: 2 }];
+  return wb;
+}

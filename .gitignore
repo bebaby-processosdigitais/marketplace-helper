@@ -5,6 +5,7 @@ node_modules/
 prisma/dev.db
 prisma/dev.db-journal
 exports/
+uploads/
 .DS_Store
 npm-debug.log*
 .claude/settings.local.json

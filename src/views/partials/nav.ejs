@@ -64,6 +64,15 @@
     <a class="<%= navActive('frete') %>" href="/frete"><i class="bi bi-truck"></i> Frete</a>
     <a class="<%= navActive('rules') %>" href="/regras"><i class="bi bi-sliders"></i> Regras</a>
     <a class="<%= navActive('simulator') %>" href="/simulador"><i class="bi bi-calculator"></i> Simulador</a>
+
+    <details class="nav-group" <%= navActive('estoque-full') ? 'open' : '' %>>
+      <summary class="nav-group-label">
+        <i class="bi bi-grid-1x2-fill"></i> <span>Telas personalizadas</span>
+        <i class="bi bi-chevron-down nav-caret"></i>
+      </summary>
+      <a class="nav-sub <%= navActive('estoque-full') %>" href="/telas/estoque-full"><i class="bi bi-boxes"></i> Estoque Full/Cross/Carreta</a>
+    </details>
+
     <a class="<%= navActive('auth') %>" href="/auth"><i class="bi bi-shield-lock"></i> Autorização</a>
   </nav>
 </aside>

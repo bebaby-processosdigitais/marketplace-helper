@@ -1,4 +1,5 @@
 import { Router } from "express";
+import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
 import {
   showLogin,
@@ -33,6 +34,22 @@ import { showProducts, saveProductCost, saveProductDims } from "../controllers/p
 import { showFrete } from "../controllers/freteController.js";
 import { showMedir } from "../controllers/medirController.js";
 import { showFull } from "../controllers/fullController.js";
+import {
+  showEstoqueFull,
+  uploadEstoqueFull,
+  gerarRelatorioEstoque,
+  limparEstoque,
+} from "../controllers/estoqueCrossController.js";
+
+// Upload em memória (o arquivo é parseado e descartado); aceita .xls/.xlsx.
+const uploadPlanilha = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ok = /\.(xls|xlsx)$/i.test(file.originalname || "");
+    cb(ok ? null : new Error("Envie um arquivo Excel (.xls ou .xlsx)."), ok);
+  },
+});
 
 const router = Router();
 
@@ -53,6 +70,10 @@ router.get("/", showDashboard);
 router.get("/anuncios", showItems);
 router.get("/dashboard", showDashboard);
 router.get("/full", showFull);
+router.get("/telas/estoque-full", showEstoqueFull);
+router.post("/telas/estoque-full/upload", uploadPlanilha.single("planilha"), uploadEstoqueFull);
+router.get("/telas/estoque-full/relatorio", gerarRelatorioEstoque);
+router.post("/telas/estoque-full/limpar", limparEstoque);
 router.get("/produtos", showProducts);
 router.get("/medir", showMedir);
 router.get("/regras", showRules);
