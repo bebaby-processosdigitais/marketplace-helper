@@ -191,6 +191,32 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.88rem;
 }
 
+/* Estoque Cross: KPIs clicáveis e colunas ordenáveis */
+.estoque-kpi {
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, outline-color 0.15s ease;
+  outline: 2px solid transparent;
+  outline-offset: -1px;
+}
+.estoque-kpi:hover {
+  box-shadow: 0 0.35rem 0.9rem rgba(15, 23, 41, 0.12) !important;
+}
+.estoque-kpi.kpi-active {
+  outline-color: var(--mh-primary);
+}
+th[data-key] {
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+th[data-key]:hover {
+  background: var(--mh-primary-soft);
+}
+.sort-ind {
+  font-size: 0.78rem;
+  margin-left: 2px;
+}
+
 .app-main {
   margin-top: var(--app-tb-h);
   margin-left: var(--app-sb-w);
