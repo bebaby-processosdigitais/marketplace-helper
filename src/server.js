@@ -15,6 +15,10 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Em produção o app fica atrás do proxy HTTPS da hospedagem: confia no
+// X-Forwarded-Proto para reconhecer a conexão como segura (cookie "secure").
+if (config.isProduction) app.set("trust proxy", 1);
+
 // View engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -32,6 +36,7 @@ app.use(
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
     httpOnly: true,
     sameSite: "lax",
+    secure: config.isProduction, // em produção, cookie só trafega por HTTPS
   })
 );
 

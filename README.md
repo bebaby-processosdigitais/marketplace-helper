@@ -28,10 +28,11 @@ de dados. Acompanha uma **landing page** comercial independente.
 13. [Mapa de rotas](#13-mapa-de-rotas)
 14. [Variáveis de ambiente](#14-variáveis-de-ambiente)
 15. [Passo a passo: executar em uma nova máquina](#15-passo-a-passo-executar-em-uma-nova-máquina)
-16. [Scripts disponíveis](#16-scripts-disponíveis)
-17. [Solução de problemas](#17-solução-de-problemas)
-18. [Limitações conhecidas e trabalhos futuros](#18-limitações-conhecidas-e-trabalhos-futuros)
-19. [Licença](#19-licença)
+16. [Publicação online (deploy no Railway)](#16-publicação-online-deploy-no-railway)
+17. [Scripts disponíveis](#17-scripts-disponíveis)
+18. [Solução de problemas](#18-solução-de-problemas)
+19. [Limitações conhecidas e trabalhos futuros](#19-limitações-conhecidas-e-trabalhos-futuros)
+20. [Licença](#20-licença)
 
 ---
 
@@ -354,8 +355,10 @@ Salvaguardas: não sobrescreve um valor válido (frete/comissão) por nulo em ca
 transitória; registra `Settings.lastSyncAt` ao concluir.
 
 O `scheduler.js` (node-cron) dispara a sincronização de **todas as contas autorizadas** à
-**meia-noite (00:00)** e ao **meio-dia (12:00)** — `cron: 0 0,12 * * *`. Por ser um aplicativo
-local, o agendamento só ocorre com o servidor em execução.
+**meia-noite (00:00)** e ao **meio-dia (12:00)** — `cron: 0 0,12 * * *`, no fuso
+**America/Sao_Paulo** (configurável por `TZ`), independentemente do relógio do servidor (em nuvem,
+normalmente UTC). O agendamento só ocorre com o servidor em execução — por isso, em produção, a
+hospedagem precisa manter o processo **sempre ligado** (ver seção 16).
 
 ---
 
@@ -366,7 +369,12 @@ local, o agendamento só ocorre com o servidor em execução.
   **cifrados em repouso** com **AES-256-GCM** (`crypto.js`), no formato `enc:v1:<iv>:<tag>:<dados>`.
   A chave deriva de `ENCRYPTION_KEY` (variável de ambiente). Mesmo que o arquivo `dev.db` vaze,
   esses segredos permanecem ilegíveis sem a chave. O *secret* nunca é devolvido à interface.
-- **Sessão:** *cookie* assinado com `SESSION_SECRET`; guarda apenas o `userId`.
+- **Sessão:** *cookie* assinado com `SESSION_SECRET`; guarda apenas o `userId`. Em produção
+  (`NODE_ENV=production`) o *cookie* recebe a flag `Secure` (só trafega por HTTPS) e o Express
+  confia no *proxy* da hospedagem (`trust proxy`) para reconhecer a conexão HTTPS.
+- **Segredos obrigatórios em produção:** com `NODE_ENV=production`, o servidor **recusa iniciar**
+  se `SESSION_SECRET` ou `ENCRYPTION_KEY` não estiverem definidos — evita subir com os valores
+  padrão do código.
 - **Versionamento:** `.env` (segredos) e `dev.db` (banco) estão no `.gitignore` — nada sensível é
   publicado no repositório.
 
@@ -443,11 +451,13 @@ Arquivo `.env` (modelo em `.env.example`):
 
 | Variável | Descrição |
 |---|---|
-| `PORT` | Porta do aplicativo (padrão **3333**) |
-| `SESSION_SECRET` | Segredo de assinatura do *cookie* de sessão (aleatório, estável) |
+| `PORT` | Porta do aplicativo (padrão **3333**; em nuvem, a hospedagem define sozinha) |
+| `SESSION_SECRET` | Segredo de assinatura do *cookie* de sessão (aleatório, estável) — **obrigatório em produção** |
 | `JWT_SECRET` | Segredo dos tokens JWT da API `/api` (opcional; usa `SESSION_SECRET` se vazio) |
-| `ENCRYPTION_KEY` | Chave (64 hex) para cifrar segredos do ML no banco (estável) |
-| `DATABASE_URL` | Caminho do SQLite — `file:./dev.db` |
+| `ENCRYPTION_KEY` | Chave (64 hex) para cifrar segredos do ML no banco (estável) — **obrigatório em produção** |
+| `DATABASE_URL` | Caminho do SQLite — local: `file:./dev.db`; produção: `file:/data/prod.db` (volume) |
+| `NODE_ENV` | `production` no servidor: ativa *cookie* `Secure`, `trust proxy` e a checagem de segredos |
+| `TZ` | Fuso do agendamento (padrão **America/Sao_Paulo**) |
 
 As credenciais do Mercado Livre **não** ficam no `.env`: são cadastradas por usuário na tela
 *Autorização*.
@@ -547,19 +557,109 @@ Acesse **<http://localhost:8080>**.
 
 ---
 
-## 16. Scripts disponíveis
+## 16. Publicação online (deploy no Railway)
+
+Para hospedar a aplicação, ela precisa de três coisas: **processo sempre ligado** (o *cron* de
+sincronização roda dentro do servidor), **disco persistente** (o banco SQLite é um arquivo) e
+**HTTPS com domínio público** (exigido pela Redirect URI do Mercado Livre). O
+**[Railway](https://railway.com)** atende aos três sem mudanças na arquitetura. Outras opções
+equivalentes: **Render** (plano pago, com *disk*) ou **Fly.io** (com *volume*). Evite planos que
+"hibernam" o app ou que não têm disco persistente (ex.: Render *free*, Vercel, Netlify) — neles o
+*cron* não dispara e o banco é apagado a cada reinício.
+
+### 16.1. Criar o serviço
+
+1. Envie o código para o GitHub (o `.env` e o `*.db` **não** são versionados).
+2. No Railway: **New Project → Deploy from GitHub repo** e selecione o repositório. O Node é
+   detectado automaticamente e o `npm install` roda o `postinstall` (`prisma generate`).
+3. Em **Settings → Deploy → Custom Start Command**, informe:
+
+   ```bash
+   npm run start:prod
+   ```
+
+   Esse script aplica as migrações (`prisma migrate deploy`) **a cada inicialização** e depois sobe
+   o servidor. As migrações precisam rodar no *start* (e não no *build*) porque o volume com o banco
+   só fica disponível com o serviço em execução.
+
+### 16.2. Criar o volume (disco persistente)
+
+No serviço, **Add Volume** com *mount path* **`/data`**. É nele que o banco `prod.db` vai morar; sem
+o volume, todos os dados seriam perdidos a cada *deploy*.
+
+### 16.3. Variáveis de ambiente
+
+Em **Variables**, cadastre (gere os segredos como na seção 15.3 — valores **novos**, diferentes
+dos usados localmente):
+
+```
+NODE_ENV=production
+DATABASE_URL=file:/data/prod.db
+SESSION_SECRET=<valor_gerado>
+JWT_SECRET=<valor_gerado>
+ENCRYPTION_KEY=<valor_gerado>
+TZ=America/Sao_Paulo
+```
+
+Não defina `PORT`: o Railway injeta a porta automaticamente e o app já a lê.
+
+### 16.4. Domínio público
+
+Em **Settings → Networking → Generate Domain**. O Railway fornece um endereço
+`https://<nome>.up.railway.app` com HTTPS pronto. Acesse-o e confira se a tela de login abre
+(e `https://<nome>.up.railway.app/api/docs` para a documentação da API).
+
+### 16.5. Ajustar o Mercado Livre
+
+1. No painel de desenvolvedor do ML (<https://developers.mercadolivre.com.br>), edite o aplicativo e
+   cadastre a **Redirect URI** apontando para a rota de *callback* do app:
+   `https://<nome>.up.railway.app/callback`.
+2. Na aplicação publicada, crie sua conta e, em **Autorização**, informe a **mesma** Redirect URI —
+   ela precisa ser **idêntica** nos dois lugares.
+3. Clique em **Autorizar no Mercado Livre**. Com o domínio público, o ML devolve o navegador
+   direto para `/callback` e o app troca o código pelos tokens sozinho — não é preciso colar a URL.
+4. Rode um **Atualizar tudo** em **Anúncios**.
+
+### 16.6. Verificação
+
+Nos *logs* do *deploy* devem aparecer:
+
+```
+All migrations have been successfully applied.
+  Marketplace Helper rodando em http://localhost:<porta>
+  Sincronização automática agendada para 00:00 e 12:00 (America/Sao_Paulo).
+```
+
+Se aparecer `Variáveis de ambiente obrigatórias em produção ausentes`, falta cadastrar
+`SESSION_SECRET` e/ou `ENCRYPTION_KEY`.
+
+### 16.7. Landing page
+
+A landing page é estática e pode ser publicada gratuitamente, separada do app, no **GitHub Pages**,
+**Netlify** ou **Vercel**, apontando para a pasta `marketplace helper LP/`. Antes, troque em
+`config.js` o `window.APP_URL` para o endereço do app publicado
+(ex.: `https://<nome>.up.railway.app`) — é ele que monta os botões de login/cadastro.
+
+> **Backup:** o banco inteiro é o arquivo `/data/prod.db`. Para uma cópia de segurança, use os
+> *backups* de volume do Railway ou baixe o arquivo periodicamente.
+
+---
+
+## 17. Scripts disponíveis
 
 | Comando | Ação |
 |---|---|
 | `npm start` | Inicia o servidor (`node src/server.js`) |
+| `npm run start:prod` | Produção: aplica as migrações (`prisma migrate deploy`) e inicia o servidor |
 | `npm run dev` | Inicia com *watch* (reinício automático ao salvar) |
+| `postinstall` | Automático após `npm install`: gera o Prisma Client |
 | `npm run prisma:migrate` | Cria/aplica migrações em desenvolvimento |
 | `npm run prisma:generate` | Regenera o Prisma Client |
 | `npm run prisma:studio` | Abre o Prisma Studio (inspeção visual do banco) |
 
 ---
 
-## 17. Solução de problemas
+## 18. Solução de problemas
 
 - **Porta 3333 ocupada / "EADDRINUSE":** há um servidor antigo em execução. O `INICIAR.BAT` já
   libera a porta automaticamente; manualmente, encerre o processo Node correspondente.
@@ -569,12 +669,16 @@ Acesse **<http://localhost:8080>**.
   **idêntica** à cadastrada no app.
 - **Campos do Prisma "unknown" / coluna inexistente:** rode `npx prisma migrate deploy` e
   `npx prisma generate` (o `INICIAR.BAT` faz isso a cada início).
+- **Login não "segura" localmente com `NODE_ENV=production`:** em produção o *cookie* é `Secure`
+  e só é aceito via HTTPS. Para rodar localmente, não defina `NODE_ENV` (ou use `development`).
+- **Dados somem após um *deploy* (Railway):** o `DATABASE_URL` não aponta para o volume, ou o
+  volume não está montado em `/data` (ver seção 16.2).
 - **Imagens/permalinks ausentes nos anúncios antigos:** execute um **Atualizar tudo** — esses
   campos passam a ser capturados na sincronização.
 
 ---
 
-## 18. Limitações conhecidas e trabalhos futuros
+## 19. Limitações conhecidas e trabalhos futuros
 
 - **Recuperação de senha por e-mail:** interface pronta; falta integrar um provedor de e-mail.
 - **Status de vencedor no catálogo:** o KPI "No catálogo" conta anúncios **no** catálogo; distinguir
@@ -585,13 +689,18 @@ Acesse **<http://localhost:8080>**.
   frete real, o armazenamento por SKU e a detecção de divergência já estão prontos.
 - **Usuários convidados (equipe):** planejado — permitir que a conta dona conceda acesso de
   leitura a usuários adicionais compartilhando os mesmos dados.
-- **Agendamento sempre ativo:** o cron depende do servidor em execução; em produção, recomenda-se
-  um ambiente sempre ligado.
-- **Produção:** para uso hospedado, recomenda-se migrar para PostgreSQL, com acesso restrito,
-  criptografia de disco e os segredos em variáveis de ambiente do servidor.
+- **Agendamento sempre ativo:** o cron depende do servidor em execução; a hospedagem precisa manter
+  o processo ligado (ver seção 16).
+- **Escala:** a configuração atual (SQLite + sincronização e *cron* no mesmo processo da web) foi
+  pensada para **uma única instância** e poucas dezenas de usuários. Para escalar, os próximos
+  passos seriam: migrar para **PostgreSQL** (com índices compostos por `userId`); mover a
+  sincronização para uma **fila de *jobs*** com *worker* separado e concorrência controlada (hoje
+  o *cron* dispara o *sync* de todas as contas ao mesmo tempo); guardar o progresso do *sync* fora
+  da memória; aplicar *lock* na renovação do *token* do ML; e persistir margem/lucro calculados para
+  que filtros e ordenações rodem no banco.
 
 ---
 
-## 19. Licença
+## 20. Licença
 
 Uso interno / proprietário.
