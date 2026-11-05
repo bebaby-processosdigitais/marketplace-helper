@@ -94,7 +94,7 @@ export const openapiSpec = {
     "/full": {
       get: {
         tags: ["Full"], summary: "Métricas, distribuição por tamanho, insights e listas dos anúncios no Full", security: bearer,
-        responses: { 200: json({ totalFull: 24, penetracao: 32.4, ativos: 22, estoqueTotal: 180, vendasTotal: 540, semEstoque: 2, estoqueBaixo: 5, parados: 3, foraLimites: 1, ticketMedio: 155.78, margemMedia: 14.2, distTamanho: [{ nome: "Pequeno", count: 10, cor: "success", pct: 41.7 }], insights: [{ color: "danger", icon: "x-octagon", titulo: "2 anúncio(s) no Full em ruptura", texto: "…", link: "/anuncios?filter=full_sem_estoque" }], estoqueBaixoList: [], paradosList: [], topVendas: [], foraList: [] }) },
+        responses: { 200: json({ totalFull: 24, penetracao: 32.4, ativos: 22, estoqueTotal: 180, vendasTotal: 540, fullAptasTotal: 142, fullNaoAptasTotal: 3, comEstoqueFull: 18, semEstoque: 2, estoqueBaixo: 5, parados: 3, foraLimites: 1, ticketMedio: 155.78, margemMedia: 14.2, distTamanho: [{ nome: "Pequeno", count: 10, cor: "success", pct: 41.7 }], insights: [{ color: "danger", icon: "x-octagon", titulo: "2 anúncio(s) no Full em ruptura", texto: "…", link: "/anuncios?filter=full_sem_estoque" }], estoqueBaixoList: [], paradosList: [], topVendas: [], foraList: [] }) },
       },
     },
     "/anuncios": {

@@ -21,7 +21,11 @@ export async function getFullData(userId) {
   const rules = await getBusinessRules(userId);
 
   const totalGeral = await prisma.item.count({ where: { userId } });
-  const items = await prisma.item.findMany({ where: { userId, full: true } });
+  // Inclui anúncios marcados como Full E anúncios com estoque no Full
+  // (ex.: cross_docking/catálogo que têm inventário no fulfillment).
+  const items = await prisma.item.findMany({
+    where: { userId, OR: [{ full: true }, { fullTotal: { gt: 0 } }, { fullNaoAptas: { gt: 0 } }] },
+  });
 
   const totalFull = items.length;
   let ativos = 0, inativos = 0, catalogo = 0;
@@ -29,6 +33,7 @@ export async function getFullData(userId) {
   let estoqueTotal = 0, vendasTotal = 0, visitasTotal = 0;
   let somaTicket = 0, countTicket = 0;
   let somaMargem = 0, countMargem = 0, somaLucro = 0;
+  let fullAptasTotal = 0, fullNaoAptasTotal = 0, comEstoqueFull = 0;
 
   const tamanhos = Object.fromEntries(TAM_ORDEM.map((t) => [t, 0]));
 
@@ -52,6 +57,9 @@ export async function getFullData(userId) {
     estoqueTotal += it.estoque || 0;
     vendasTotal += it.vendas || 0;
     visitasTotal += it.visitas || 0;
+    fullAptasTotal += it.fullAptas || 0;
+    fullNaoAptasTotal += it.fullNaoAptas || 0;
+    if ((it.fullTotal || 0) > 0 || (it.fullNaoAptas || 0) > 0) comEstoqueFull++;
     if (it.catalogo) catalogo++;
 
     const ativo = it.status === "active";
@@ -124,6 +132,7 @@ export async function getFullData(userId) {
     ativos, inativos, catalogo,
     semEstoque, estoqueBaixo, parados, foraLimites, prejuizo, semMedidas,
     estoqueTotal, vendasTotal, visitasTotal,
+    fullAptasTotal, fullNaoAptasTotal, comEstoqueFull,
     ticketMedio, margemMedia, lucroMedio, countMargem,
     distTamanho,
     insights,

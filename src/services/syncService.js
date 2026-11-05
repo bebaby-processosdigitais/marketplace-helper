@@ -5,6 +5,7 @@ import {
   getItemsDetails,
   getItemVisits,
   getShippingCost,
+  getFulfillmentStock,
   getItemPrices,
   getListingFee,
   getCategoryPath,
@@ -89,6 +90,52 @@ function parsePrices(data, pricesList) {
     return { precoDe: original, precoPor: itemPrice, priceNum: itemPrice };
   }
   return { precoDe: normal, precoPor: 0, priceNum: normal };
+}
+
+// Coleta o estoque no Full somando todos os inventory_id do anúncio
+// (nível do item + cada variação). Mantém o valor anterior se a consulta falhar.
+async function coletarEstoqueFull(userId, data, existing) {
+  const invIds = new Set();
+  if (data.inventory_id) invIds.add(data.inventory_id);
+  for (const v of data.variations || []) if (v.inventory_id) invIds.add(v.inventory_id);
+
+  if (invIds.size === 0) {
+    return { inventoryId: null, fullAptas: null, fullNaoAptas: null, fullTotal: null, fullDetalhe: null, fullStockAt: null };
+  }
+
+  let aptas = 0, naoAptas = 0, total = 0;
+  const det = {};
+  let algum = false;
+  for (const inv of invIds) {
+    const st = await getFulfillmentStock(userId, inv);
+    if (!st) continue;
+    algum = true;
+    aptas += st.available;
+    naoAptas += st.notAvailable;
+    total += st.total;
+    for (const d of st.detail) det[d.status] = (det[d.status] || 0) + (d.quantity || 0);
+  }
+
+  const inventoryId = [...invIds].join(", ");
+  if (!algum) {
+    // Nenhuma consulta respondeu: preserva o que já havia.
+    return {
+      inventoryId,
+      fullAptas: existing?.fullAptas ?? null,
+      fullNaoAptas: existing?.fullNaoAptas ?? null,
+      fullTotal: existing?.fullTotal ?? null,
+      fullDetalhe: existing?.fullDetalhe ?? null,
+      fullStockAt: existing?.fullStockAt ?? null,
+    };
+  }
+  return {
+    inventoryId,
+    fullAptas: aptas,
+    fullNaoAptas: naoAptas,
+    fullTotal: total,
+    fullDetalhe: Object.keys(det).length ? JSON.stringify(det) : null,
+    fullStockAt: new Date(),
+  };
 }
 
 // ================= sync =================
@@ -201,6 +248,9 @@ async function upsertItem(userId, data, zip, state) {
   const visitasConsultado = await getItemVisits(userId, mlb);
   const visitas = visitasConsultado != null ? visitasConsultado : existing?.visitas ?? 0;
 
+  // Estoque no Full (fulfillment) por inventory_id
+  const estoqueFull = await coletarEstoqueFull(userId, data, existing);
+
   // Imagem de capa (prefere a foto em alta; cai pro thumbnail seguro)
   const thumbnail =
     data.pictures?.[0]?.secure_url ||
@@ -232,6 +282,7 @@ async function upsertItem(userId, data, zip, state) {
     estoque: data.available_quantity || 0,
     catalogo: !!data.catalog_listing,
     full: data.shipping?.logistic_type === "fulfillment",
+    ...estoqueFull,
     categoria1,
     categoria2,
     categoria3,

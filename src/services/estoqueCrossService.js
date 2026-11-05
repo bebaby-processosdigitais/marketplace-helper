@@ -114,7 +114,7 @@ export function parseErpWorkbook(buffer) {
 export async function buildCross(userId, erp) {
   const items = await prisma.item.findMany({
     where: { userId },
-    select: { sku: true, mlb: true, titulo: true, full: true, catalogo: true, estoque: true, status: true },
+    select: { sku: true, mlb: true, titulo: true, full: true, catalogo: true, estoque: true, status: true, fullAptas: true, fullNaoAptas: true },
   });
 
   // Agrupa anúncios por SKU.
@@ -123,7 +123,7 @@ export async function buildCross(userId, erp) {
     if (it.sku == null || String(it.sku).trim() === "") continue;
     const key = normKey(it.sku);
     if (!mlMap.has(key)) {
-      mlMap.set(key, { sku: key, mlbs: [], titulos: {}, catalogo: false, full: false, estoque: 0, status: null, _ativo: false });
+      mlMap.set(key, { sku: key, mlbs: [], titulos: {}, catalogo: false, full: false, estoque: 0, status: null, _ativo: false, fullMlAptas: null, fullMlNaoAptas: null });
     }
     const g = mlMap.get(key);
     g.mlbs.push(it.mlb);
@@ -131,6 +131,8 @@ export async function buildCross(userId, erp) {
     if (it.catalogo) g.catalogo = true;
     if (it.full) g.full = true;
     g.estoque = Math.max(g.estoque, it.estoque || 0);
+    if (it.fullAptas != null) g.fullMlAptas = (g.fullMlAptas || 0) + it.fullAptas;
+    if (it.fullNaoAptas != null) g.fullMlNaoAptas = (g.fullMlNaoAptas || 0) + it.fullNaoAptas;
     if (it.status === "active" && !g._ativo) { g.status = "active"; g._ativo = true; }
     else if (!g.status) g.status = it.status;
   }
@@ -167,6 +169,8 @@ export async function buildCross(userId, erp) {
       estaNoFull: ml ? ml.full : null,
       estoque: ml ? ml.estoque : null,
       estoqueFull,
+      fullMlAptas: ml ? ml.fullMlAptas : null,
+      fullMlNaoAptas: ml ? ml.fullMlNaoAptas : null,
       status: ml ? statusLabel(ml.status) : "",
       cadastrado,
       produtoErp: e ? e.produto : "",

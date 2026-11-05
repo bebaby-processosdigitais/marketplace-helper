@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Item" ADD COLUMN "fullAptas" INTEGER;
+ALTER TABLE "Item" ADD COLUMN "fullDetalhe" TEXT;
+ALTER TABLE "Item" ADD COLUMN "fullNaoAptas" INTEGER;
+ALTER TABLE "Item" ADD COLUMN "fullStockAt" DATETIME;
+ALTER TABLE "Item" ADD COLUMN "fullTotal" INTEGER;
+ALTER TABLE "Item" ADD COLUMN "inventoryId" TEXT;

@@ -139,6 +139,25 @@ function fallbackByPrice(price) {
   return null;
 }
 
+// Estoque no Full (fulfillment) de um inventory_id.
+// Retorna { total, available, notAvailable, detail:[{status,quantity}] } ou null.
+export async function getFulfillmentStock(userId, inventoryId) {
+  if (!inventoryId) return null;
+  const data = await apiGet(
+    userId,
+    `${API}/inventories/${inventoryId}/stock/fulfillment`,
+    { retries: 2, delay: 800 }
+  );
+  if (!data || data.available_quantity == null) return null;
+  return {
+    inventoryId,
+    total: data.total || 0,
+    available: data.available_quantity || 0,
+    notAvailable: data.not_available_quantity || 0,
+    detail: Array.isArray(data.not_available_detail) ? data.not_available_detail : [],
+  };
+}
+
 // Precos/promocoes do item
 export async function getItemPrices(userId, mlb) {
   const data = await apiGet(userId, `${API}/items/${mlb}/prices`, { retries: 2 });

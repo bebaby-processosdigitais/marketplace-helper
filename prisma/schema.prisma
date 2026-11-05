@@ -96,6 +96,13 @@ model Item {
   estoque       Int      @default(0)
   catalogo      Boolean  @default(false)
   full          Boolean  @default(false)
+  // Estoque no Full (fulfillment) consultado via inventory_id
+  inventoryId   String?
+  fullAptas     Int?
+  fullNaoAptas  Int?
+  fullTotal     Int?
+  fullDetalhe   String?
+  fullStockAt   DateTime?
   categoria1    String?
   categoria2    String?
   categoria3    String?

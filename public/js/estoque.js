@@ -102,6 +102,7 @@
       '<td class="text-center">' + boolBadge(r.temCatalogo) + "</td>" +
       '<td class="text-center">' + boolBadge(r.estaNoFull) + "</td>" +
       '<td class="text-end">' + (r.estoque == null ? "—" : r.estoque) + "</td>" +
+      '<td class="text-end">' + (r.fullMlAptas == null ? "—" : r.fullMlAptas) + "</td>" +
       '<td class="text-end">' + r.estoqueFull + "</td>" +
       "<td>" + esc(r.status || "—") + "</td>" +
       '<td class="text-center">' +
@@ -123,7 +124,7 @@
 
     tbody.innerHTML =
       slice.map(rowHtml).join("") ||
-      '<tr><td colspan="' + (9 + locais.length) + '" class="text-center text-muted py-3">Nenhum item para este filtro.</td></tr>';
+      '<tr><td colspan="' + (10 + locais.length) + '" class="text-center text-muted py-3">Nenhum item para este filtro.</td></tr>';
 
     info.textContent =
       "mostrando " + (total ? start + 1 : 0) + "–" + Math.min(start + state.size, total) +

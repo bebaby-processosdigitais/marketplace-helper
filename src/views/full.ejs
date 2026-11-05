@@ -57,8 +57,17 @@
   <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
     <%- kpiLink('/anuncios?filter=full', 'Anúncios no Full', totalFull, 'text-success', penetracao.toFixed(1) + '% do total (' + totalGeral + ')', 'lightning-charge-fill', 'success') %>
     <%- kpiValue('Full ativos', ativos, '', inativos + ' inativo(s)', 'play-circle', 'primary') %>
-    <%- kpiValue('Estoque total no Full', estoqueTotal, '', 'unidades armazenadas', 'box-seam', 'primary') %>
+    <%- kpiValue('Estoque total no Full', estoqueTotal, '', 'unidades (qtd. do anúncio)', 'box-seam', 'primary') %>
     <%- kpiValue('Vendas no Full', vendasTotal, '', visitasTotal + ' visita(s)', 'cart-check', 'success') %>
+  </div>
+
+  <!-- Estoque real no centro de distribuição (fulfillment) -->
+  <div class="kpi-group-label"><i class="bi bi-building"></i> Estoque no CD (fulfillment)</div>
+  <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <%- kpiValue('Aptas para venda', fullAptasTotal, 'text-success', 'disponíveis no Full', 'check2-circle', 'success') %>
+    <%- kpiValue('Não aptas para venda', fullNaoAptasTotal, fullNaoAptasTotal>0?'text-danger':'', 'em revisão/avariadas/etc.', 'exclamation-octagon', 'danger') %>
+    <%- kpiValue('Anúncios com estoque no CD', comEstoqueFull, '', 'têm unidades no fulfillment', 'box2', 'primary') %>
+    <%- kpiValue('Última leitura', 'API ML', '', 'via inventory_id · /stock/fulfillment', 'cloud-arrow-down', 'secondary') %>
   </div>
 
   <!-- Alertas de estoque -->
@@ -147,11 +156,11 @@
     <div class="table-responsive">
       <table class="table table-sm table-hover mb-0 align-middle table-stack">
         <thead class="table-light">
-          <tr><th>MLB</th><th>Título</th><th class="text-end">Estoque</th><th class="text-end">Vendas</th><th class="text-end">Margem</th><th>Saúde</th></tr>
+          <tr><th>MLB</th><th>Título</th><th class="text-end">Estoque</th><th class="text-end" title="Aptas para venda no CD (fulfillment)">Full aptas</th><th class="text-end">Vendas</th><th class="text-end">Margem</th><th>Saúde</th></tr>
         </thead>
         <tbody>
           <% if (estoqueBaixoList.length === 0) { %>
-            <tr><td colspan="6" class="text-center text-muted py-3">Nenhum item no Full com estoque baixo. 👍</td></tr>
+            <tr><td colspan="7" class="text-center text-muted py-3">Nenhum item no Full com estoque baixo. 👍</td></tr>
           <% } %>
           <% estoqueBaixoList.forEach(function(it) { %>
             <tr>
@@ -160,6 +169,7 @@
               <td data-label="Estoque" class="text-end">
                 <span class="badge <%= (it.estoque||0) <= 0 ? 'text-bg-danger' : 'text-bg-warning' %>"><%= it.estoque || 0 %></span>
               </td>
+              <td data-label="Full aptas" class="text-end <%= (it.fullAptas != null && it.fullAptas <= 5) ? 'text-danger fw-semibold' : '' %>"><%= it.fullAptas == null ? '—' : it.fullAptas %></td>
               <td data-label="Vendas" class="text-end"><%= it.vendas || 0 %></td>
               <td data-label="Margem" class="text-end">
                 <% if (it._calc.margem != null) { %>
